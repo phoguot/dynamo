@@ -45,6 +45,19 @@ class UserAclTest extends TestCase
         self::assertFalse($this->acl->isRoleAllowed(UserConst::ROLE_MANAGER, 'user:user', 'create'));
         self::assertFalse($this->acl->isRoleAllowed(UserConst::ROLE_MANAGER, 'user:user', 'edit'));
         self::assertFalse($this->acl->isRoleAllowed(UserConst::ROLE_MANAGER, 'user:user', 'resetpassword'));
+        self::assertFalse($this->acl->isRoleAllowed(UserConst::ROLE_MANAGER, 'user:user', 'delete'));
+    }
+
+    public function test_chi_quan_tri_xoa_duoc_tai_khoan(): void
+    {
+        // Xóa tài khoản là quyền chỉ Quản trị hệ thống có — mọi vai trò khác bị từ chối.
+        foreach (array_keys(UserConst::ROLE_LABELS) as $role) {
+            self::assertSame(
+                $role === UserConst::ROLE_ADMIN,
+                $this->acl->isRoleAllowed($role, 'user:user', 'delete'),
+                sprintf('Vai trò %s không được phép xóa tài khoản', $role)
+            );
+        }
     }
 
     public function test_chi_quan_tri_vao_duoc_man_hinh_phan_quyen(): void
