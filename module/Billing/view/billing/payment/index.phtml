@@ -1,0 +1,32 @@
+<?php
+$this->headTitle('Phiếu thu');
+$filters = $searchForm->getSubmittedData();
+?>
+<h1>Phiếu thu</h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php if ($canCreate): ?><p><a href="<?= $this->url('payments', ['action' => 'create']) ?>">Ghi nhận phiếu thu</a></p><?php endif; ?>
+<?= $this->partial('partial/payment/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+<?php if ($paginator === null || count($paginator) === 0): ?>
+    <p>Chưa có phiếu thu nào khớp điều kiện lọc.</p>
+<?php else: ?>
+    <table>
+        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> phiếu thu</caption>
+        <thead><tr><th>Số</th><th>Hóa đơn</th><th>Khách hàng</th><th>Ngày</th><th>Phương thức</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody><?php foreach ($paginator as $item): ?><tr>
+            <td><?= $this->escapeHtml((string)$item->getPaymentNo()) ?></td>
+            <td><?= $item->getInvoiceId() ? '#' . (int)$item->getInvoiceId() : '-' ?></td>
+            <td>#<?= (int)$item->getCustomerId() ?></td>
+            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getPaymentDate())) ?></td>
+            <td><?= $this->escapeHtml($item->getMethodLabel()) ?></td>
+            <td><?= number_format($item->getAmount(), 0, ',', '.') ?> đ</td>
+            <td><?= $this->escapeHtml($item->getStatusLabel()) ?></td>
+            <td><a href="<?= $this->url('payments', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+    <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+    <nav aria-label="Phân trang"><p>Trang <?= $currentPage ?> / <?= $totalPages ?></p>
+        <?php if ($currentPage > 1): ?><a href="<?= $this->url('payments') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+        <?php if ($currentPage < $totalPages): ?><a href="<?= $this->url('payments') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+    </nav>
+<?php endif; ?>

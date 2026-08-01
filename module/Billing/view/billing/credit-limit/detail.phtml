@@ -1,0 +1,12 @@
+<?php $this->headTitle('Hạn mức khách hàng #' . (string)$creditLimit->getCustomerId()); ?>
+<h1>Hạn mức khách hàng #<?= (int)$creditLimit->getCustomerId() ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('credit-limits') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('credit-limits', ['action' => 'edit', 'id' => (int)$creditLimit->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Hạn mức</dt><dd><?= number_format($creditLimit->getCreditLimit(), 0, ',', '.') ?> đ</dd>
+    <dt>Công nợ hiện tại</dt><dd><?= number_format($creditLimit->getCurrentDebt(), 0, ',', '.') ?> đ</dd>
+    <dt>Nợ quá hạn</dt><dd><?= number_format($creditLimit->getOverdueAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Đang chặn</dt><dd><?= $creditLimit->isBlocked() ? 'Có' : 'Không' ?></dd>
+    <dt>Lần kiểm tra</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($creditLimit->getLastCheckedAt())) ?></dd>
+</dl>

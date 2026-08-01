@@ -1,0 +1,67 @@
+{
+    "name": "dynamo/rental",
+    "description": "Dynamo Rental — hệ thống quản lý và cho thuê máy phát điện",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "ezyang/htmlpurifier": "^4.18",
+        "laminas/laminas-config": "^3.9",
+        "laminas/laminas-db": "^2.19",
+        "laminas/laminas-filter": "^2.34",
+        "laminas/laminas-http": "^2.19",
+        "laminas/laminas-inputfilter": "^2.30",
+        "laminas/laminas-modulemanager": "^2.16",
+        "laminas/laminas-mvc": "^3.7",
+        "laminas/laminas-mvc-plugin-flashmessenger": "^1.10",
+        "laminas/laminas-paginator": "^2.18",
+        "laminas/laminas-router": "^3.12",
+        "laminas/laminas-servicemanager": "^3.22",
+        "laminas/laminas-session": "^2.17",
+        "laminas/laminas-stdlib": "^3.19",
+        "laminas/laminas-validator": "^2.64",
+        "laminas/laminas-view": "^2.32"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "module/Application/src/",
+            "User\\": "module/User/src/",
+            "Platform\\": "module/Platform/src/",
+            "Fleet\\": "module/Fleet/src/",
+            "Crm\\": "module/Crm/src/",
+            "Sales\\": "module/Sales/src/",
+            "Rental\\": "module/Rental/src/",
+            "Dispatch\\": "module/Dispatch/src/",
+            "Maintenance\\": "module/Maintenance/src/",
+            "Billing\\": "module/Billing/src/",
+            "Reporting\\": "module/Reporting/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ApplicationTest\\": "module/Application/test/",
+            "UserTest\\": "module/User/test/",
+            "PlatformTest\\": "module/Platform/test/",
+            "FleetTest\\": "module/Fleet/test/",
+            "CrmTest\\": "module/Crm/test/",
+            "SalesTest\\": "module/Sales/test/",
+            "RentalTest\\": "module/Rental/test/",
+            "DispatchTest\\": "module/Dispatch/test/",
+            "MaintenanceTest\\": "module/Maintenance/test/",
+            "BillingTest\\": "module/Billing/test/",
+            "ReportingTest\\": "module/Reporting/test/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "laminas/laminas-component-installer": true
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

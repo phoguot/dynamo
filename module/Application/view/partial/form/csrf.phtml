@@ -1,0 +1,18 @@
+<?php
+/**
+ * Hai input hidden bắt buộc của MỌI form POST.
+ *
+ * `formName` cho server biết phải kiểm token theo form nào — thiếu nó thì token của
+ * form khác cũng lọt. Không bao giờ render tay hai input này, luôn gọi partial này.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Application\Form\AppForm $form
+ */
+
+use Application\Model\AppConst;
+
+?>
+<input type="hidden" name="<?= AppConst::FIELD_FORM_NAME ?>"
+       value="<?= $this->escapeHtmlAttr($form->getFormName()) ?>">
+<input type="hidden" name="<?= AppConst::FIELD_CSRF_TOKEN ?>"
+       value="<?= $this->escapeHtmlAttr($form->getCsrfToken()) ?>">

@@ -1,0 +1,20 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Site\SiteSaveForm $saveForm
+ * @var Crm\Model\Customer\CustomerModel $customer
+ * @var Crm\Model\Site\SiteModel|null $site
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $site !== null;
+$this->headTitle($isEdit ? 'Sửa công trình' : 'Thêm công trình');
+?>
+<h1><?= $isEdit ? 'Sửa công trình' : 'Thêm công trình' ?> — <?= $this->escapeHtml((string)$customer->getName()) ?></h1>
+
+<?= $this->partial('partial/site/save-form', [
+    'form'     => $saveForm,
+    'customer' => $customer,
+    'site'     => $site,
+    'errors'   => $errors,
+]) ?>

@@ -1,0 +1,52 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var string|null $userName
+ */
+
+$this->headTitle('Dynamo Rental');
+?>
+<main class="welcomeScreen">
+    <section class="welcomeHero" aria-labelledby="welcome-title">
+        <div class="mark welcomeMark">
+            <span aria-hidden="true">DG</span>
+            <div>
+                <strong>Dynamo Rental</strong>
+                <small>Depot control</small>
+            </div>
+        </div>
+
+        <div class="welcomeCopy">
+            <p class="sectionLabel">Hệ thống vận hành</p>
+            <h1 id="welcome-title">Thuê máy phát điện, nhìn từ một bảng điều hành.</h1>
+            <p>Quản lý đội máy, báo giá, hợp đồng, đơn thuê, giao nhận, bảo trì, hóa đơn và công nợ trong cùng một luồng làm việc.</p>
+            <div class="welcomeActions">
+                <a class="button primary" href="<?= $this->url('login') ?>">Bắt đầu đăng nhập</a>
+                <a class="button" href="<?= $this->url('login') ?>?next=%2Fdashboard">Mở dashboard</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="welcomeBoard" aria-label="Luồng vận hành chính">
+        <article>
+            <small>01</small>
+            <strong>Đội máy</strong>
+            <span>Trạng thái, vị trí, giờ máy, lịch bảo trì.</span>
+        </article>
+        <article>
+            <small>02</small>
+            <strong>Kinh doanh</strong>
+            <span>Bảng giá, báo giá, hợp đồng và giữ máy.</span>
+        </article>
+        <article>
+            <small>03</small>
+            <strong>Điều phối</strong>
+            <span>Lệnh giao, thu hồi, đổi máy và phân công kỹ thuật.</span>
+        </article>
+        <article>
+            <small>04</small>
+            <strong>Tài chính</strong>
+            <span>Hóa đơn, phiếu thu, đặt cọc và báo cáo.</span>
+        </article>
+    </section>
+</main>

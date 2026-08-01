@@ -1,0 +1,36 @@
+<?php $this->headTitle('Bảng giá ' . (string)$priceList->getCode()); ?>
+<h1>Bảng giá <?= $this->escapeHtml((string)$priceList->getCode()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('price-lists') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('price-lists', ['action' => 'edit', 'id' => (int)$priceList->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Tên</dt><dd><?= $this->escapeHtml((string)$priceList->getName()) ?></dd>
+    <dt>Hiệu lực</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($priceList->getValidFrom())) ?> → <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($priceList->getValidTo(), 'hiện hành')) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($priceList->getActiveLabel()) ?></dd>
+    <dt>Ghi chú</dt><dd><?= $this->escapeHtml((string)$priceList->getNote()) ?></dd>
+</dl>
+<?php if ($canEdit): ?>
+    <?= $this->partial('partial/form/open', ['form' => $toggleForm, 'action' => $this->url('price-lists', ['action' => 'toggleactive', 'id' => (int)$priceList->getId()])]) ?>
+        <?= $this->partial('partial/form/actions', [
+            'submitLabel' => $priceList->getIsActive() ? 'Ngưng dùng' : 'Kích hoạt',
+            'confirm' => 'Xác nhận đổi trạng thái bảng giá?',
+        ]) ?>
+    <?= $this->partial('partial/form/close') ?>
+<?php endif; ?>
+<h2>Dòng giá</h2>
+<?php if ($canEdit): ?>
+    <p><a href="<?= $this->url('price-list-items', ['action' => 'create']) ?>?priceListId=<?= (int)$priceList->getId() ?>">Thêm dòng giá</a></p>
+<?php endif; ?>
+<?php if ($items === []): ?>
+    <p>Chưa có dòng giá. Dòng giá sẽ được nhập ở bước cấu hình chi tiết.</p>
+<?php else: ?>
+    <table><thead><tr><th>kVA</th><th>Bậc</th><th>Tối thiểu</th><th>Đơn giá</th><th>Ngày lẻ</th><?php if ($canEdit): ?><th>Thao tác</th><?php endif; ?></tr></thead><tbody>
+        <?php foreach ($items as $item): ?><tr>
+            <td><?= (int)$item->getCapacityFrom() ?>-<?= (int)$item->getCapacityTo() ?></td>
+            <td><?= $this->escapeHtml($item->getDurationLabel()) ?></td>
+            <td><?= (int)$item->getMinDays() ?> ngày</td>
+            <td><?= number_format((int)$item->getUnitPrice(), 0, ',', '.') ?></td>
+            <td><?= number_format((int)$item->getDailyRate(), 0, ',', '.') ?></td>
+            <?php if ($canEdit): ?><td><a href="<?= $this->url('price-list-items', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a></td><?php endif; ?>
+        </tr><?php endforeach; ?>
+    </tbody></table>
+<?php endif; ?>

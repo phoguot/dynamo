@@ -1,0 +1,12 @@
+<?php
+/** @var Maintenance\Form\MaintenanceJob\MaintenanceJobStatusForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action, 'class' => 'form-maintenance-job-status']) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái mới', 'control' => 'select', 'required' => true, 'choices' => $nextStatuses]) ?>
+    <?= $row(['name' => 'laborCost', 'label' => 'Chi phí công thợ', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'findings', 'label' => 'Kết quả kiểm tra', 'control' => 'textarea', 'attrs' => ['rows' => 4, 'maxlength' => 5000]]) ?>
+    <?= $row(['name' => 'cancelReason', 'label' => 'Lý do hủy', 'control' => 'textarea', 'attrs' => ['rows' => 3, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Đổi trạng thái']) ?>
+<?= $this->partial('partial/form/close') ?>

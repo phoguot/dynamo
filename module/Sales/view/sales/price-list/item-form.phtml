@@ -1,0 +1,10 @@
+<?php $this->headTitle($item ? 'Sửa dòng bảng giá' : 'Thêm dòng bảng giá'); ?>
+<h1><?= $item ? 'Sửa dòng bảng giá' : 'Thêm dòng bảng giá' ?></h1>
+<p>Bảng giá <?= $this->escapeHtml((string)$priceList->getCode()) ?></p>
+<?= $this->partial('partial/price-list/item-save-form', [
+    'form' => $saveForm,
+    'priceList' => $priceList,
+    'item' => $item,
+    'errors' => $errors,
+]) ?>
+

@@ -1,0 +1,18 @@
+<?php
+/** @var Billing\Form\Payment\PaymentSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['paymentNo', 'invoiceId', 'customerId', 'amount', 'paymentDate', 'method', 'referenceNo', 'attachmentId', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-payment']) ?>
+    <?= $row(['name' => 'paymentNo', 'label' => 'Số phiếu thu', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'invoiceId', 'label' => 'ID hóa đơn', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'amount', 'label' => 'Số tiền', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'paymentDate', 'label' => 'Ngày thanh toán', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'method', 'label' => 'Phương thức', 'control' => 'select', 'required' => true, 'choices' => $form->methodChoices()]) ?>
+    <?= $row(['name' => 'referenceNo', 'label' => 'Mã tham chiếu', 'attrs' => ['maxlength' => 60]]) ?>
+    <?= $row(['name' => 'attachmentId', 'label' => 'ID chứng từ đính kèm', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 4, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Ghi nhận phiếu thu', 'cancelUrl' => $this->url('payments')]) ?>
+<?= $this->partial('partial/form/close') ?>

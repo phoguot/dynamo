@@ -1,0 +1,22 @@
+<?php
+/**
+ * Mở thẻ <form> kèm CSRF. Đóng bằng partial/form/close.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Application\Form\AppForm $form
+ * @var string|null $action  để trống = submit về chính URL hiện tại
+ * @var string|null $method  mặc định post
+ * @var bool|null   $hasFile form có upload file hay không
+ * @var string|null $class
+ */
+
+$method = strtolower((string)($method ?? 'post'));
+?>
+<form method="<?= $this->escapeHtmlAttr($method) ?>"
+      <?php if (!empty($action)): ?>action="<?= $this->escapeHtmlAttr($action) ?>"<?php endif; ?>
+      <?php if (!empty($hasFile)): ?>enctype="multipart/form-data"<?php endif; ?>
+      <?php if (!empty($class)): ?>class="<?= $this->escapeHtmlAttr($class) ?>"<?php endif; ?>
+      novalidate>
+<?php if ($method !== 'get'): ?>
+    <?= $this->partial('partial/form/csrf', ['form' => $form]) ?>
+<?php endif; ?>

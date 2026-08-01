@@ -1,0 +1,93 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Dispatch\Form\DispatchJob\DispatchJobSearchForm $searchForm
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var array<string, string> $errors
+ * @var bool $canCreate
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Lệnh điều phối');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Lịch tuyến hôm nay</h1>
+        <p>Lệnh giao, thu hồi và kiểm tra hiện trường được gom thành bảng điều phối theo ca.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canCreate): ?>
+            <a class="button primary" href="<?= $this->url('dispatch-jobs', ['action' => 'create']) ?>">Tạo lệnh</a>
+        <?php endif; ?>
+        <a class="button" href="<?= $this->url('vehicles') ?>">Xe điều phối</a>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<section class="dispatchGrid">
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Bộ lọc lệnh</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/dispatch-job/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead">
+                <strong>Danh sách lệnh điều phối</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> lệnh</span><?php endif; ?>
+            </div>
+
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có lệnh nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="dispatchList">
+                    <?php foreach ($paginator as $item): ?>
+                        <div class="dispatchRow">
+                            <time><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($item->getScheduledAt(), '-', 'd/m/Y H:i:s')) ?></time>
+                            <b><?= $this->escapeHtml($item->getTypeLabel()) ?></b>
+                            <code><?= $this->escapeHtml((string)$item->getJobNo()) ?></code>
+                            <span>Đơn #<?= (int)$item->getRentalOrderId() ?> · Máy #<?= (int)$item->getGeneratorId() ?></span>
+                            <span>Xe <?= $item->getVehicleId() ? '#' . (int)$item->getVehicleId() : 'chưa gán' ?></span>
+                            <span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span>
+                            <span>
+                                <a href="<?= $this->url('dispatch-jobs', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                                <?php if ($canEdit): ?><a href="<?= $this->url('dispatch-jobs', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?><a class="button" href="<?= $this->url('dispatch-jobs') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?><a class="button" href="<?= $this->url('dispatch-jobs') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Bản đồ và năng lực đội</strong><span class="badge run">Hôm nay</span></div>
+            <div class="map" aria-label="Sơ đồ tuyến điều phối">
+                <span class="pin a" aria-hidden="true"></span>
+                <span class="pin b" aria-hidden="true"></span>
+                <span class="pin c" aria-hidden="true"></span>
+                <span class="pin d" aria-hidden="true"></span>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead"><strong>Năng lực</strong><span class="badge">Ops</span></div>
+            <div class="specGrid">
+                <div class="spec"><small>Tổng lệnh lọc</small><strong><?= $paginator ? (int)$paginator->getTotalItemCount() : 0 ?></strong></div>
+                <div class="spec"><small>Trang hiện tại</small><strong><?= $paginator ? (int)count($paginator) : 0 ?></strong></div>
+                <div class="spec"><small>Xe</small><strong><a href="<?= $this->url('vehicles') ?>">Mở</a></strong></div>
+            </div>
+        </article>
+    </div>
+</section>

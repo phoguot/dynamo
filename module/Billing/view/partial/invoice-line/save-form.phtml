@@ -1,0 +1,15 @@
+<?php
+/** @var Billing\Form\InvoiceLine\InvoiceLineSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action, 'class' => 'form-invoice-line']) ?>
+    <?= $row(['name' => 'lineType', 'label' => 'Loại dòng', 'control' => 'select', 'required' => true, 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'description', 'label' => 'Diễn giải', 'required' => true, 'attrs' => ['maxlength' => 255]]) ?>
+    <?= $row(['name' => 'quantity', 'label' => 'Số lượng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 0, 'step' => '0.01']]) ?>
+    <?= $row(['name' => 'unit', 'label' => 'Đơn vị', 'control' => 'select', 'choices' => $form->unitChoices()]) ?>
+    <?= $row(['name' => 'unitPrice', 'label' => 'Đơn giá', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'isVatable', 'label' => 'Tính VAT', 'control' => 'select', 'choices' => [1 => 'Có', 0 => 'Không'], 'emptyChoice' => '']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Thêm dòng']) ?>
+<?= $this->partial('partial/form/close') ?>

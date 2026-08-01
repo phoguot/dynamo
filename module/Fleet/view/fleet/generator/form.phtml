@@ -1,0 +1,23 @@
+<?php
+/**
+ * Trang thêm mới / sửa máy phát điện.
+ *
+ * Trang chỉ đặt tiêu đề rồi gọi partial — markup form nằm ở
+ * `view/partial/generator/save-form.phtml`, không viết inline ở đây.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Fleet\Form\Generator\GeneratorSaveForm $saveForm
+ * @var Fleet\Model\Generator\GeneratorModel|null $generator
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $generator !== null;
+$this->headTitle($isEdit ? 'Sửa máy' : 'Thêm máy mới');
+?>
+<h1><?= $isEdit ? 'Sửa thông tin máy' : 'Thêm máy phát điện' ?></h1>
+
+<?= $this->partial('partial/generator/save-form', [
+    'form'      => $saveForm,
+    'generator' => $generator,
+    'errors'    => $errors,
+]) ?>

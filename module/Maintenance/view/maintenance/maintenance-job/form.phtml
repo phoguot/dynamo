@@ -1,0 +1,11 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Maintenance\Model\MaintenanceJob\MaintenanceJobModel|null $job
+ * @var Maintenance\Form\MaintenanceJob\MaintenanceJobSaveForm $saveForm
+ * @var array<string, string> $errors
+ */
+$this->headTitle($job ? 'Sửa phiếu bảo trì' : 'Thêm phiếu bảo trì');
+?>
+<h1><?= $job ? 'Sửa phiếu bảo trì' : 'Thêm phiếu bảo trì' ?></h1>
+<?= $this->partial('partial/maintenance-job/save-form', ['form' => $saveForm, 'job' => $job, 'errors' => $errors]) ?>

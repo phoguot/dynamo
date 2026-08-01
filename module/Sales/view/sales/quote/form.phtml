@@ -1,0 +1,4 @@
+<?php $this->headTitle($quote ? 'Sửa báo giá' : 'Thêm báo giá'); ?>
+<h1><?= $quote ? 'Sửa báo giá' : 'Thêm báo giá' ?></h1>
+<?= $this->partial('partial/quote/save-form', ['form' => $saveForm, 'quote' => $quote, 'errors' => $errors]) ?>
+

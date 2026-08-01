@@ -1,0 +1,11 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Dispatch\Model\Vehicle\VehicleModel|null $vehicle
+ * @var Dispatch\Form\Vehicle\VehicleSaveForm $saveForm
+ * @var array<string, string> $errors
+ */
+$this->headTitle($vehicle ? 'Sửa xe' : 'Thêm xe');
+?>
+<h1><?= $vehicle ? 'Sửa xe' : 'Thêm xe' ?></h1>
+<?= $this->partial('partial/vehicle/save-form', ['form' => $saveForm, 'vehicle' => $vehicle, 'errors' => $errors]) ?>

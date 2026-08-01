@@ -1,0 +1,14 @@
+<?php
+/** @var Billing\Form\CreditLimit\CreditLimitSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['customerId', 'creditLimit', 'currentDebt', 'overdueAmount', 'isBlocked']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-credit-limit']) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'creditLimit', 'label' => 'Hạn mức', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'currentDebt', 'label' => 'Công nợ hiện tại', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'overdueAmount', 'label' => 'Nợ quá hạn', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'isBlocked', 'label' => 'Chặn công nợ', 'control' => 'select', 'choices' => [1 => 'Có', 0 => 'Không'], 'emptyChoice' => '']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $creditLimit ? 'Lưu thay đổi' : 'Thêm hạn mức', 'cancelUrl' => $this->url('credit-limits')]) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,37 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Customer\CustomerSaveForm $form
+ * @var Crm\Model\Customer\CustomerModel|null $customer
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $customer !== null;
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+$fieldsWithOwnError = [
+    'code', 'name', 'customerType', 'taxCode', 'idNumber', 'phone',
+    'email', 'bankAccount', 'address', 'salesOwnerId', 'note',
+];
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => $fieldsWithOwnError]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-customer']) ?>
+    <?= $row(['name' => 'code', 'label' => 'Mã khách hàng', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'name', 'label' => 'Tên khách hàng', 'required' => true, 'attrs' => ['maxlength' => 200]]) ?>
+    <?= $row(['name' => 'customerType', 'label' => 'Loại khách hàng', 'control' => 'select', 'required' => true, 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'taxCode', 'label' => 'Mã số thuế', 'attrs' => ['maxlength' => 20]]) ?>
+    <?= $row(['name' => 'idNumber', 'label' => 'CCCD', 'attrs' => ['maxlength' => 20]]) ?>
+    <?= $row(['name' => 'phone', 'label' => 'Điện thoại', 'attrs' => ['maxlength' => 20]]) ?>
+    <?= $row(['name' => 'email', 'label' => 'Email', 'type' => 'email', 'attrs' => ['maxlength' => 190]]) ?>
+    <?= $row(['name' => 'bankAccount', 'label' => 'Tài khoản ngân hàng', 'attrs' => ['maxlength' => 40]]) ?>
+    <?= $row(['name' => 'address', 'label' => 'Địa chỉ', 'attrs' => ['maxlength' => 255]]) ?>
+    <?= $row(['name' => 'salesOwnerId', 'label' => 'Nhân viên kinh doanh phụ trách', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 4]]) ?>
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => $isEdit ? 'Lưu thay đổi' : 'Thêm khách hàng',
+        'cancelUrl'   => $this->url('customers'),
+    ]) ?>
+<?= $this->partial('partial/form/close') ?>

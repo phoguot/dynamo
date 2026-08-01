@@ -1,0 +1,10 @@
+<?php
+/** @var Billing\Form\Invoice\InvoiceStatusForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action, 'class' => 'form-invoice-status']) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái mới', 'control' => 'select', 'required' => true, 'choices' => $nextStatuses]) ?>
+    <?= $row(['name' => 'voidReason', 'label' => 'Lý do hủy', 'control' => 'textarea', 'attrs' => ['rows' => 3, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Đổi trạng thái']) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,19 @@
+<?php
+/** @var Dispatch\Form\DispatchJob\DispatchJobSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['jobNo', 'jobType', 'rentalOrderId', 'generatorId', 'newGeneratorId', 'siteId', 'vehicleId', 'scheduledAt', 'priority', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-dispatch-job']) ?>
+    <?= $row(['name' => 'jobNo', 'label' => 'Số lệnh', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'jobType', 'label' => 'Loại lệnh', 'control' => 'select', 'required' => true, 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'rentalOrderId', 'label' => 'ID đơn thuê', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'newGeneratorId', 'label' => 'ID máy mới', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'siteId', 'label' => 'ID công trình', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'vehicleId', 'label' => 'ID xe', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'scheduledAt', 'label' => 'Lịch hẹn', 'type' => 'datetime-local']) ?>
+    <?= $row(['name' => 'priority', 'label' => 'Ưu tiên', 'control' => 'select', 'required' => true, 'choices' => $form->priorityChoices()]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 4, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $job ? 'Lưu thay đổi' : 'Thêm lệnh', 'cancelUrl' => $this->url('dispatch-jobs')]) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,9 @@
+<?php
+/** @var Billing\Form\Payment\PaymentCancelForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action, 'class' => 'form-payment-cancel']) ?>
+    <?= $row(['name' => 'cancelReason', 'label' => 'Lý do hủy', 'control' => 'textarea', 'required' => true, 'attrs' => ['rows' => 3, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Hủy phiếu thu', 'confirm' => 'Hủy phiếu thu này?']) ?>
+<?= $this->partial('partial/form/close') ?>

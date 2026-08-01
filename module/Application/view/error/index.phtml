@@ -1,0 +1,15 @@
+<?php
+/**
+ * Trang lỗi hệ thống. KHÔNG hiển thị stack trace hay thông tin môi trường ra ngoài —
+ * chi tiết lỗi chỉ nằm trong log (xem Application\Listener\ErrorListener).
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ */
+
+use Application\Model\AppMessage;
+
+$this->headTitle('Đã xảy ra lỗi');
+?>
+<h1>Đã xảy ra lỗi</h1>
+<p><?= $this->escapeHtml(AppMessage::SYSTEM_ERROR) ?></p>
+<p><a href="<?= $this->url('home') ?>"><?= $this->escapeHtml(AppMessage::COMMON_BACK_TO_HOME) ?></a></p>

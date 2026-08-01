@@ -1,0 +1,11 @@
+<?php
+/** @var Dispatch\Form\Assignment\AssignmentSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action]) ?>
+    <?= $row(['name' => 'userId', 'label' => 'ID người dùng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'roleInJob', 'label' => 'Vai trò trong lệnh', 'control' => 'select', 'required' => true, 'choices' => $form->roleChoices()]) ?>
+    <?= $row(['name' => 'isLead', 'label' => 'Người phụ trách chính', 'control' => 'select', 'choices' => [0 => 'Không', 1 => 'Có']]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Gán người']) ?>
+<?= $this->partial('partial/form/close') ?>

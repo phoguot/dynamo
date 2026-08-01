@@ -1,0 +1,18 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Customer\CustomerSaveForm $saveForm
+ * @var Crm\Model\Customer\CustomerModel|null $customer
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $customer !== null;
+$this->headTitle($isEdit ? 'Sửa khách hàng' : 'Thêm khách hàng');
+?>
+<h1><?= $isEdit ? 'Sửa thông tin khách hàng' : 'Thêm khách hàng' ?></h1>
+
+<?= $this->partial('partial/customer/save-form', [
+    'form'     => $saveForm,
+    'customer' => $customer,
+    'errors'   => $errors,
+]) ?>

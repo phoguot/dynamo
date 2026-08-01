@@ -1,0 +1,103 @@
+<?php
+/**
+ * MARKUP form thêm mới / sửa tài khoản người dùng.
+ *
+ * Đây là nơi DUY NHẤT chứa markup của form này — trang chỉ gọi partial, controller không
+ * biết gì về HTML. Field khai ở User\Form\User\UserSaveForm; tên field ở đây phải khớp.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserSaveForm $form
+ * @var User\Model\User\UserModel|null $user
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $user !== null;
+$values = $form->getSubmittedData();
+
+/** Không đổ mật khẩu ngược lại vào HTML — xem chú thích ở partial/auth/login-form.phtml. */
+unset($values['password'], $values['passwordConfirm']);
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+
+/** Field đã hiện lỗi ngay dưới ô nhập — không nhắc lại ở khối lỗi đầu form. */
+$fieldsWithOwnError = [
+    'username', 'fullName', 'email', 'phone', 'role', 'password', 'passwordConfirm', 'note',
+];
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => $fieldsWithOwnError]) ?>
+
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-user']) ?>
+
+    <?= $row([
+        'name'     => 'username',
+        'label'    => 'Tên đăng nhập',
+        'required' => true,
+        'hint'     => 'Chữ thường, số và các ký tự . _ - (3–30 ký tự). Không đổi được sau khi tạo nên hãy đặt cẩn thận.',
+        'attrs'    => ['maxlength' => 30, 'autocomplete' => 'off'] + ($isEdit ? ['readonly' => true] : []),
+    ]) ?>
+
+    <?= $row([
+        'name'     => 'fullName',
+        'label'    => 'Họ và tên',
+        'required' => true,
+        'attrs'    => ['maxlength' => 120],
+    ]) ?>
+
+    <?= $row([
+        'name'     => 'role',
+        'label'    => 'Vai trò',
+        'control'  => 'select',
+        'required' => true,
+        'hint'     => 'Vai trò quyết định quyền mặc định. Cần cấp/cắt thêm cho riêng người này thì dùng màn hình Phân quyền.',
+        'choices'  => $form->roleChoices(),
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'email',
+        'label' => 'Email',
+        'type'  => 'email',
+        'attrs' => ['maxlength' => 190, 'autocomplete' => 'off'],
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'phone',
+        'label' => 'Số điện thoại',
+        'type'  => 'tel',
+        'attrs' => ['maxlength' => 20, 'autocomplete' => 'off'],
+    ]) ?>
+
+    <?php if (!$isEdit): ?>
+        <?= $row([
+            'name'     => 'password',
+            'label'    => 'Mật khẩu',
+            'type'     => 'password',
+            'required' => true,
+            'hint'     => 'Tối thiểu 10 ký tự. Gửi cho người dùng qua kênh an toàn, không nhắn kèm tên đăng nhập trong cùng một tin.',
+            'attrs'    => ['autocomplete' => 'new-password'],
+        ]) ?>
+
+        <?= $row([
+            'name'     => 'passwordConfirm',
+            'label'    => 'Nhập lại mật khẩu',
+            'type'     => 'password',
+            'required' => true,
+            'attrs'    => ['autocomplete' => 'new-password'],
+        ]) ?>
+    <?php endif; ?>
+
+    <?= $row([
+        'name'    => 'note',
+        'label'   => 'Ghi chú',
+        'control' => 'textarea',
+        'attrs'   => ['maxlength' => 255, 'rows' => 3],
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => $isEdit ? 'Lưu thay đổi' : 'Thêm người dùng',
+        'cancelUrl'   => $this->url('users'),
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

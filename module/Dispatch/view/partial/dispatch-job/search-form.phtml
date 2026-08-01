@@ -1,0 +1,14 @@
+<?php
+/** @var Dispatch\Form\DispatchJob\DispatchJobSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search']) ?>
+    <?= $row(['name' => 'keyword', 'label' => 'Số lệnh', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'jobType', 'label' => 'Loại lệnh', 'control' => 'select', 'choices' => $form->typeChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $row(['name' => 'rentalOrderId', 'label' => 'ID đơn thuê', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'vehicleId', 'label' => 'ID xe', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

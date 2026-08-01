@@ -1,0 +1,4 @@
+<?php $this->headTitle($priceList ? 'Sửa bảng giá' : 'Thêm bảng giá'); ?>
+<h1><?= $priceList ? 'Sửa bảng giá' : 'Thêm bảng giá' ?></h1>
+<?= $this->partial('partial/price-list/save-form', ['form' => $saveForm, 'priceList' => $priceList, 'errors' => $errors]) ?>
+

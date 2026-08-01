@@ -1,0 +1,15 @@
+<?php
+/** @var Dispatch\Form\Vehicle\VehicleSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['code', 'plateNumber', 'vehicleType', 'capacityKg', 'driverId', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-vehicle']) ?>
+    <?= $row(['name' => 'code', 'label' => 'Mã xe', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'plateNumber', 'label' => 'Biển số', 'required' => true, 'attrs' => ['maxlength' => 20, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'vehicleType', 'label' => 'Loại xe', 'control' => 'select', 'required' => true, 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'capacityKg', 'label' => 'Tải trọng kg', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'driverId', 'label' => 'ID tài xế mặc định', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 3, 'maxlength' => 255]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $vehicle ? 'Lưu thay đổi' : 'Thêm xe', 'cancelUrl' => $this->url('vehicles')]) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Đẩy mọi request vào public/ (web root thật của ứng dụng).
+# Request đã nằm trong /public/ thì bỏ qua để tránh lặp.
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ /public/$1 [L]

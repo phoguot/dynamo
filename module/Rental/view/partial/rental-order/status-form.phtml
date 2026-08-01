@@ -1,0 +1,13 @@
+<?php
+/** @var Rental\Form\RentalOrder\RentalOrderStatusForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Chuyển sang', 'control' => 'select', 'required' => true, 'choices' => $nextStatuses]) ?>
+    <?= $row(['name' => 'startHourMeter', 'label' => 'Chỉ số giờ máy đầu', 'type' => 'number', 'attrs' => ['min' => 0, 'step' => '0.1']]) ?>
+    <?= $row(['name' => 'actualEndDate', 'label' => 'Ngày thu hồi thực tế', 'type' => 'date']) ?>
+    <?= $row(['name' => 'endHourMeter', 'label' => 'Chỉ số giờ máy cuối', 'type' => 'number', 'attrs' => ['min' => 0, 'step' => '0.1']]) ?>
+    <?= $row(['name' => 'cancelReason', 'label' => 'Lý do hủy', 'attrs' => ['maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Cập nhật trạng thái']) ?>
+<?= $this->partial('partial/form/close') ?>

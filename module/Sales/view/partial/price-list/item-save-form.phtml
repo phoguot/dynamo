@@ -1,0 +1,23 @@
+<?php
+/** @var Sales\Form\PriceList\PriceListItemSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['priceListId', 'capacityFrom', 'capacityTo', 'durationTier', 'minDays', 'unitPrice', 'dailyRate', 'deliveryFee', 'installFee', 'depositAmount']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-price-list-item']) ?>
+    <?= $row(['name' => 'priceListId', 'label' => 'ID bảng giá', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1, 'readonly' => 'readonly']]) ?>
+    <?= $row(['name' => 'capacityFrom', 'label' => 'Công suất từ (kVA)', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'capacityTo', 'label' => 'Công suất đến (kVA)', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'durationTier', 'label' => 'Bậc thời hạn', 'control' => 'select', 'required' => true, 'choices' => $form->durationChoices()]) ?>
+    <?= $row(['name' => 'minDays', 'label' => 'Số ngày tối thiểu', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'unitPrice', 'label' => 'Đơn giá', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'dailyRate', 'label' => 'Đơn giá ngày lẻ', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'deliveryFee', 'label' => 'Phí vận chuyển mặc định', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'installFee', 'label' => 'Phí lắp đặt mặc định', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'depositAmount', 'label' => 'Tiền cọc mặc định', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => $item ? 'Lưu thay đổi' : 'Thêm dòng giá',
+        'cancelUrl' => $this->url('price-lists', ['action' => 'detail', 'id' => (int)$priceList->getId()]),
+    ]) ?>
+<?= $this->partial('partial/form/close') ?>
+

@@ -1,0 +1,23 @@
+<?php
+/** @var Sales\Form\Contract\ContractSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['contractNo', 'quoteId', 'customerId', 'siteId', 'signedDate', 'effectiveFrom', 'effectiveTo', 'totalAmount', 'depositAmount', 'paymentTermDays', 'billingCycle', 'creditOverrideReason', 'terms']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-contract']) ?>
+    <?= $row(['name' => 'contractNo', 'label' => 'Số hợp đồng', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'quoteId', 'label' => 'ID báo giá nguồn', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'siteId', 'label' => 'ID công trình', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'signedDate', 'label' => 'Ngày ký', 'type' => 'date']) ?>
+    <?= $row(['name' => 'effectiveFrom', 'label' => 'Hiệu lực từ', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'effectiveTo', 'label' => 'Hiệu lực đến', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'totalAmount', 'label' => 'Tổng giá trị', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'depositAmount', 'label' => 'Tiền cọc', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'paymentTermDays', 'label' => 'Số ngày công nợ', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'billingCycle', 'label' => 'Chu kỳ hóa đơn', 'control' => 'select', 'required' => true, 'choices' => $form->billingChoices()]) ?>
+    <?= $row(['name' => 'creditOverrideReason', 'label' => 'Lý do vượt hạn mức', 'attrs' => ['maxlength' => 500]]) ?>
+    <?= $row(['name' => 'terms', 'label' => 'Điều khoản', 'control' => 'textarea', 'attrs' => ['rows' => 6]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $contract ? 'Lưu thay đổi' : 'Thêm hợp đồng', 'cancelUrl' => $this->url('contracts')]) ?>
+<?= $this->partial('partial/form/close') ?>
+

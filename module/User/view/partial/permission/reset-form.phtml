@@ -1,0 +1,26 @@
+<?php
+/**
+ * MARKUP nút "gỡ toàn bộ ngoại lệ quyền".
+ *
+ * CSRF token riêng (`user.permission.reset`) — token của form ma trận không dùng ở đây được.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserPermissionResetForm $form
+ * @var User\Model\User\UserModel $user
+ */
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'action' => $this->url('permissions', ['action' => 'reset', 'id' => $user->getId()]),
+    'class'  => 'form-permission-reset',
+]) ?>
+
+    <input type="hidden" name="userId" value="<?= (int)$user->getId() ?>">
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Gỡ toàn bộ ngoại lệ',
+        'confirm'     => 'Mọi quyền cấp thêm hoặc cắt bớt cho riêng người này sẽ bị xóa, '
+            . 'tài khoản trở về đúng quyền mặc định của vai trò. Tiếp tục?',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

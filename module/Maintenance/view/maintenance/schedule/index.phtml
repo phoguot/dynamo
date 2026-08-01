@@ -1,0 +1,40 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Maintenance\Form\Schedule\ScheduleSearchForm $searchForm
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var array<string, string> $errors
+ * @var bool $canCreate
+ * @var bool $canEdit
+ */
+$this->headTitle('Lịch bảo trì');
+$filters = $searchForm->getSubmittedData();
+?>
+<h1>Lịch bảo trì</h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php if ($canCreate): ?><p><a href="<?= $this->url('maintenance-schedules', ['action' => 'create']) ?>">Thêm lịch</a></p><?php endif; ?>
+<?= $this->partial('partial/schedule/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+<?php if ($paginator === null || count($paginator) === 0): ?>
+    <p>Chưa có lịch nào khớp điều kiện lọc.</p>
+<?php else: ?>
+    <table>
+        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> lịch</caption>
+        <thead><tr><th>Máy</th><th>Loại</th><th>Chu kỳ giờ</th><th>Chu kỳ ngày</th><th>Tới hạn giờ</th><th>Tới hạn ngày</th><th>Đang dùng</th><th>Thao tác</th></tr></thead>
+        <tbody><?php foreach ($paginator as $item): ?><tr>
+            <td>#<?= (int)$item->getGeneratorId() ?></td>
+            <td><?= $this->escapeHtml($item->getTypeLabel()) ?></td>
+            <td><?= $item->getIntervalHours() !== null ? $this->escapeHtml((string)$item->getIntervalHours()) : '-' ?></td>
+            <td><?= $item->getIntervalDays() !== null ? (int)$item->getIntervalDays() : '-' ?></td>
+            <td><?= $item->getNextDueHour() !== null ? $this->escapeHtml((string)$item->getNextDueHour()) : '-' ?></td>
+            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getNextDueDate())) ?></td>
+            <td><?= $item->isActive() ? 'Có' : 'Không' ?></td>
+            <td><a href="<?= $this->url('maintenance-schedules', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a><?php if ($canEdit): ?> <a href="<?= $this->url('maintenance-schedules', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+    <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+    <nav aria-label="Phân trang"><p>Trang <?= $currentPage ?> / <?= $totalPages ?></p>
+        <?php if ($currentPage > 1): ?><a href="<?= $this->url('maintenance-schedules') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+        <?php if ($currentPage < $totalPages): ?><a href="<?= $this->url('maintenance-schedules') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+    </nav>
+<?php endif; ?>

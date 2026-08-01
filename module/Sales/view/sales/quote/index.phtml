@@ -1,0 +1,58 @@
+<?php
+$this->headTitle('Báo giá');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Báo giá</h1>
+        <p>Quản lý báo giá thuê máy, thời gian thuê, trạng thái duyệt và tổng giá trị.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canEdit): ?>
+            <a class="button primary" href="<?= $this->url('quotes', ['action' => 'create']) ?>">Thêm báo giá</a>
+        <?php endif; ?>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel filterPanel">
+            <div class="panelHead"><strong>Bộ lọc báo giá</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/quote/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead">
+                <strong>Danh sách báo giá</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> báo giá</span><?php endif; ?>
+            </div>
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có báo giá nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> báo giá</caption>
+                        <thead><tr><th>Số</th><th>Khách hàng</th><th>Thời gian thuê</th><th>Trạng thái</th><th>Tổng tiền</th><th>Thao tác</th></tr></thead>
+                        <tbody><?php foreach ($paginator as $item): ?><tr>
+                            <td><?= $this->escapeHtml((string)$item->getQuoteNo()) ?></td>
+                            <td>#<?= (int)$item->getCustomerId() ?></td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getRentFrom())) ?> → <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getRentTo())) ?></td>
+                            <td><span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                            <td><?= number_format((int)$item->getTotalAmount(), 0, ',', '.') ?></td>
+                            <td><a href="<?= $this->url('quotes', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a><?php if ($canEdit): ?> <a href="<?= $this->url('quotes', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?></td>
+                        </tr><?php endforeach; ?></tbody>
+                    </table>
+                </div>
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?><a class="button" href="<?= $this->url('quotes') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?><a class="button" href="<?= $this->url('quotes') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

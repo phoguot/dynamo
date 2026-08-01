@@ -1,0 +1,98 @@
+<?php
+$this->headTitle('Báo cáo');
+?>
+<header class="pageHead">
+    <div>
+        <h1>Báo cáo</h1>
+        <p>Tổng hợp khai thác đội máy, doanh thu tháng và công nợ theo tuổi nợ.</p>
+    </div>
+    <div class="actions">
+        <a class="button" href="<?= $this->url('dashboard') ?>">Về dashboard</a>
+    </div>
+</header>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel listPanel">
+            <div class="panelHead"><strong>Khai thác đội máy theo ngày</strong><span class="badge">Fleet</span></div>
+            <?= $this->partial('partial/report/fleet-utilization-search-form', ['form' => $fleetForm, 'errors' => $fleetPaginatorErrors]) ?>
+            <?php if ($fleetPaginator === null || count($fleetPaginator) === 0): ?>
+                <p>Chưa có dữ liệu khai thác đội máy.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$fleetPaginator->getTotalItemCount() ?> dòng</caption>
+                        <thead><tr><th>Ngày</th><th>Kho</th><th>Tổng</th><th>Hoạt động</th><th>Đang thuê</th><th>Sẵn sàng</th><th>Giữ chỗ</th><th>Vận chuyển</th><th>Bảo trì</th><th>Sửa chữa</th><th>Ngừng</th><th>Tỷ lệ</th><th>Tính lúc</th></tr></thead>
+                        <tbody><?php foreach ($fleetPaginator as $item): ?><tr>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getReportDate())) ?></td>
+                            <td><?= $item->getWarehouseCode() ? $this->escapeHtml((string)$item->getWarehouseCode()) : 'Toàn công ty' ?></td>
+                            <td><?= (int)$item->getTotalGenerators() ?></td>
+                            <td><?= (int)$item->getActiveGenerators() ?></td>
+                            <td><?= (int)$item->getRentedCount() ?></td>
+                            <td><?= (int)$item->getAvailableCount() ?></td>
+                            <td><?= (int)$item->getHeldCount() ?></td>
+                            <td><?= (int)$item->getTransitCount() ?></td>
+                            <td><?= (int)$item->getMaintenanceCount() ?></td>
+                            <td><?= (int)$item->getRepairCount() ?></td>
+                            <td><?= (int)$item->getRetiredCount() ?></td>
+                            <td><?= number_format($item->getUtilizationRate(), 2, ',', '.') ?>%</td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($item->getComputedAt())) ?></td>
+                        </tr><?php endforeach; ?></tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead"><strong>Doanh thu tháng</strong><span class="badge">Revenue</span></div>
+            <?= $this->partial('partial/report/revenue-search-form', ['form' => $revenueForm, 'errors' => $revenuePaginatorErrors]) ?>
+            <?php if ($revenuePaginator === null || count($revenuePaginator) === 0): ?>
+                <p>Chưa có dữ liệu doanh thu.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$revenuePaginator->getTotalItemCount() ?> dòng</caption>
+                        <thead><tr><th>Kỳ</th><th>Khách hàng</th><th>Đã phát hành</th><th>Đã thu</th><th>Còn phải thu</th><th>Quá hạn</th><th>Số đơn</th><th>Tỷ lệ thu</th><th>Tính lúc</th></tr></thead>
+                        <tbody><?php foreach ($revenuePaginator as $item): ?><tr>
+                            <td><?= (int)$item->getPeriodMonth() ?>/<?= (int)$item->getPeriodYear() ?></td>
+                            <td><?= $item->getCustomerId() ? '#' . (int)$item->getCustomerId() : 'Toàn công ty' ?></td>
+                            <td><?= number_format($item->getInvoicedAmount(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getCollectedAmount(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getOutstandingAmount(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getOverdueAmount(), 0, ',', '.') ?> đ</td>
+                            <td><?= (int)$item->getOrderCount() ?></td>
+                            <td><?= number_format($item->getCollectionRate(), 2, ',', '.') ?>%</td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($item->getComputedAt())) ?></td>
+                        </tr><?php endforeach; ?></tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead"><strong>Công nợ theo tuổi nợ</strong><span class="badge risk">AR</span></div>
+            <?= $this->partial('partial/report/receivables-search-form', ['form' => $receivablesForm, 'errors' => $receivablesPaginatorErrors]) ?>
+            <?php if ($receivablesPaginator === null || count($receivablesPaginator) === 0): ?>
+                <p>Chưa có dữ liệu công nợ.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$receivablesPaginator->getTotalItemCount() ?> dòng</caption>
+                        <thead><tr><th>Ngày</th><th>Khách hàng</th><th>0-30</th><th>31-60</th><th>61-90</th><th>Trên 90</th><th>Tổng</th><th>DSO</th><th>Tính lúc</th></tr></thead>
+                        <tbody><?php foreach ($receivablesPaginator as $item): ?><tr>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getSnapshotDate())) ?></td>
+                            <td>#<?= (int)$item->getCustomerId() ?></td>
+                            <td><?= number_format($item->getBucket0To30(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getBucket31To60(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getBucket61To90(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getBucketOver90(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getTotalDebt(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getDsoDays(), 2, ',', '.') ?> ngày</td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($item->getComputedAt())) ?></td>
+                        </tr><?php endforeach; ?></tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

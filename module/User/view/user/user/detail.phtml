@@ -1,0 +1,73 @@
+<?php
+/**
+ * Chi tiết một tài khoản: hồ sơ, khóa/mở khóa, đặt lại mật khẩu, lối sang phân quyền.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Model\User\UserModel $user
+ * @var bool $canEdit
+ * @var bool $isSelf
+ * @var array<string, string> $nextStatuses
+ * @var User\Form\User\UserStatusForm $statusForm
+ * @var User\Form\User\UserPasswordForm $passwordForm
+ * @var array<string, string> $errors
+ *
+ * CHƯA CHỐT HỆ THIẾT KẾ (.claude/rules/ui.md).
+ */
+
+$this->headTitle((string)$user->getFullName());
+?>
+<h1><?= $this->escapeHtml((string)$user->getFullName()) ?></h1>
+<p><?= $this->escapeHtml((string)$user->getUsername()) ?> ·
+   <?= $this->escapeHtml($user->getRoleLabel()) ?> ·
+   <?= $this->escapeHtml($user->getStatusLabel()) ?></p>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<h2>Hồ sơ</h2>
+<dl>
+    <dt>Email</dt>
+    <dd><?= $this->escapeHtml((string)$user->getEmail() ?: '—') ?></dd>
+
+    <?php /* Trang chi tiết hiện đủ số điện thoại; danh sách thì che bớt. */ ?>
+    <dt>Số điện thoại</dt>
+    <dd><?= $this->escapeHtml((string)$user->getPhone() ?: '—') ?></dd>
+
+    <dt>Đăng nhập gần nhất</dt>
+    <dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($user->getLastLoginAt(), 'Chưa từng đăng nhập')) ?></dd>
+
+    <dt>Ghi chú</dt>
+    <dd><?= $this->escapeHtml((string)$user->getNote() ?: '—') ?></dd>
+</dl>
+
+<?php if ($canEdit): ?>
+    <p>
+        <a href="<?= $this->url('users', ['action' => 'edit', 'id' => (int)$user->getId()]) ?>">Sửa hồ sơ</a>
+        <a href="<?= $this->url('permissions', ['action' => 'index', 'id' => (int)$user->getId()]) ?>">Phân quyền chi tiết</a>
+    </p>
+
+    <h2>Trạng thái tài khoản</h2>
+    <?php if ($isSelf): ?>
+        <p>Không thể tự khóa tài khoản đang đăng nhập. Nhờ một quản trị viên khác thực hiện.</p>
+    <?php else: ?>
+        <?= $this->partial('partial/user/status-form', [
+            'form'         => $statusForm,
+            'user'         => $user,
+            'nextStatuses' => $nextStatuses,
+            'errors'       => $errors,
+        ]) ?>
+    <?php endif; ?>
+
+    <h2>Đặt lại mật khẩu</h2>
+    <?= $this->partial('partial/user/password-form', [
+        'form'   => $passwordForm,
+        'user'   => $user,
+        'errors' => $errors,
+    ]) ?>
+<?php endif; ?>
+
+<p><a href="<?= $this->url('users') ?>">Về danh sách người dùng</a></p>

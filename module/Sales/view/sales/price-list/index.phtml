@@ -1,0 +1,40 @@
+<?php
+$this->headTitle('Bảng giá');
+$filters = $searchForm->getSubmittedData();
+?>
+<h1>Bảng giá</h1>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<?php if ($canEdit): ?><p><a href="<?= $this->url('price-lists', ['action' => 'create']) ?>">Thêm bảng giá</a></p><?php endif; ?>
+<?= $this->partial('partial/price-list/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+
+<?php if ($paginator === null || count($paginator) === 0): ?>
+    <p>Chưa có bảng giá nào khớp điều kiện lọc.</p>
+<?php else: ?>
+    <table>
+        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> bảng giá</caption>
+        <thead><tr><th>Mã</th><th>Tên</th><th>Hiệu lực</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody>
+        <?php foreach ($paginator as $item): ?>
+            <tr>
+                <td><?= $this->escapeHtml((string)$item->getCode()) ?></td>
+                <td><?= $this->escapeHtml((string)$item->getName()) ?></td>
+                <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getValidFrom())) ?> → <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getValidTo(), 'hiện hành')) ?></td>
+                <td><?= $this->escapeHtml($item->getActiveLabel()) ?></td>
+                <td>
+                    <a href="<?= $this->url('price-lists', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                    <?php if ($canEdit): ?><a href="<?= $this->url('price-lists', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+    <nav aria-label="Phân trang">
+        <p>Trang <?= $currentPage ?> / <?= $totalPages ?></p>
+        <?php if ($currentPage > 1): ?><a href="<?= $this->url('price-lists') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+        <?php if ($currentPage < $totalPages): ?><a href="<?= $this->url('price-lists') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+    </nav>
+<?php endif; ?>

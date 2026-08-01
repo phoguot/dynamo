@@ -1,0 +1,55 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Dispatch\Model\DispatchJob\DispatchJobModel $job
+ * @var Dispatch\Model\Assignment\AssignmentModel[] $assignments
+ * @var array<string, string> $nextStatuses
+ * @var Dispatch\Form\DispatchJob\DispatchJobStatusForm $statusForm
+ * @var Dispatch\Form\Assignment\AssignmentSaveForm $assignmentForm
+ * @var bool $canEdit
+ * @var bool $canChangeStatus
+ * @var bool $canAssign
+ * @var bool $canUnassign
+ * @var array<string, string> $errors
+ */
+$this->headTitle('Lệnh ' . (string)$job->getJobNo());
+?>
+<h1>Lệnh <?= $this->escapeHtml((string)$job->getJobNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('dispatch-jobs') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('dispatch-jobs', ['action' => 'edit', 'id' => (int)$job->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Loại lệnh</dt><dd><?= $this->escapeHtml($job->getTypeLabel()) ?></dd>
+    <dt>Đơn thuê</dt><dd>#<?= (int)$job->getRentalOrderId() ?></dd>
+    <dt>Máy</dt><dd>#<?= (int)$job->getGeneratorId() ?></dd>
+    <dt>Máy mới</dt><dd><?= $job->getNewGeneratorId() ? '#' . (int)$job->getNewGeneratorId() : '-' ?></dd>
+    <dt>Công trình</dt><dd><?= $job->getSiteId() ? '#' . (int)$job->getSiteId() : '-' ?></dd>
+    <dt>Xe</dt><dd><?= $job->getVehicleId() ? '#' . (int)$job->getVehicleId() : '-' ?></dd>
+    <dt>Lịch hẹn</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($job->getScheduledAt())) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($job->getStatusLabel()) ?></dd>
+    <dt>Ưu tiên</dt><dd><?= $this->escapeHtml($job->getPriorityLabel()) ?></dd>
+    <dt>Lý do thất bại</dt><dd><?= $job->getFailReason() ? $this->escapeHtml((string)$job->getFailReason()) : '-' ?></dd>
+    <dt>Bên chịu phí</dt><dd><?= $job->getFeeBearer() ? $this->escapeHtml($job->getFeeBearerLabel()) : '-' ?></dd>
+    <dt>Ghi chú</dt><dd><?= $job->getNote() ? $this->escapeHtml((string)$job->getNote()) : '-' ?></dd>
+</dl>
+<?php if ($canChangeStatus && $nextStatuses !== []): ?>
+    <h2>Đổi trạng thái</h2>
+    <?= $this->partial('partial/dispatch-job/status-form', ['form' => $statusForm, 'nextStatuses' => $nextStatuses, 'action' => $this->url('dispatch-jobs', ['action' => 'changestatus', 'id' => (int)$job->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<h2>Phân công</h2>
+<?php if ($canAssign): ?>
+    <?= $this->partial('partial/assignment/save-form', ['form' => $assignmentForm, 'action' => $this->url('dispatch-jobs', ['action' => 'assign', 'id' => (int)$job->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<?php if ($assignments === []): ?>
+    <p>Chưa gán người nào cho lệnh này.</p>
+<?php else: ?>
+    <table>
+        <thead><tr><th>Người dùng</th><th>Vai trò</th><th>Phụ trách chính</th><th>Thao tác</th></tr></thead>
+        <tbody><?php foreach ($assignments as $assignment): ?><tr>
+            <td>#<?= (int)$assignment->getUserId() ?></td>
+            <td><?= $this->escapeHtml($assignment->getRoleLabel()) ?></td>
+            <td><?= $assignment->getIsLead() ? 'Có' : 'Không' ?></td>
+            <td><?php if ($canUnassign): ?><form method="post" action="<?= $this->url('dispatch-jobs', ['action' => 'unassign', 'id' => (int)$job->getId()]) ?>"><input type="hidden" name="assignmentId" value="<?= (int)$assignment->getId() ?>"><?= $this->partial('partial/form/csrf', ['form' => $assignmentForm]) ?><button type="submit">Bỏ gán</button></form><?php else: ?>-<?php endif; ?></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+<?php endif; ?>

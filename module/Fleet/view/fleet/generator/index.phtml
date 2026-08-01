@@ -1,0 +1,126 @@
+<?php
+/**
+ * Danh sách máy phát điện.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var Fleet\Form\Generator\GeneratorSearchForm $searchForm
+ * @var array<string, string> $errors
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Đội máy phát điện');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Đội máy phát điện</h1>
+        <p>Danh mục máy, trạng thái khai thác, giờ máy tích lũy và vị trí hiện tại.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canEdit): ?>
+            <a class="button primary" href="<?= $this->url('generators', ['action' => 'create']) ?>">Thêm máy</a>
+        <?php endif; ?>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="grid fleetIndex">
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Bộ lọc đội máy</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/generator/search-form', [
+                'form'   => $searchForm,
+                'errors' => $errors,
+            ]) ?>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead">
+                <strong>Danh sách máy phát điện</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> máy</span><?php endif; ?>
+            </div>
+
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có máy nào khớp điều kiện lọc.
+                    <?= $canEdit ? 'Bấm "Thêm máy" để bắt đầu dựng đội máy.' : '' ?></p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                <table class="dataTable fleetTable">
+                    <thead>
+                    <tr>
+                        <th scope="col">Mã máy</th>
+                        <th scope="col">Tên máy</th>
+                        <th scope="col">kVA</th>
+                        <th scope="col">Nhiên liệu</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col">Giờ máy</th>
+                        <th scope="col">Vị trí</th>
+                        <th scope="col">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($paginator as $item): /** @var Fleet\Model\Generator\GeneratorModel $item */ ?>
+                        <tr>
+                            <td data-label="Mã máy"><code><?= $this->escapeHtml((string)$item->getCode()) ?></code></td>
+                            <td data-label="Tên máy" class="cellText"><?= $this->escapeHtml((string)$item->getName()) ?></td>
+                            <td data-label="kVA" class="cellNumber"><?= (int)$item->getCapacityKva() ?></td>
+                            <td data-label="Nhiên liệu"><?= $this->escapeHtml($item->getFuelLabel()) ?></td>
+                            <td data-label="Trạng thái"><span class="badge run"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                            <td data-label="Giờ máy" class="cellNumber"><?= number_format((float)$item->getHourMeter(), 1) ?></td>
+                            <td data-label="Vị trí" class="cellText"><?= $this->escapeHtml((string)$item->getCurrentLocation()) ?></td>
+                            <td data-label="Thao tác" class="tableActions">
+                                <a href="<?= $this->url('generators', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                                <?php if ($canEdit): ?>
+                                    <a href="<?= $this->url('generators', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+                </div>
+
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?>
+                        <a class="button" href="<?= $this->url('generators') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a>
+                    <?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a class="button" href="<?= $this->url('generators') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Tóm tắt đội máy</strong><span class="badge run">Fleet</span></div>
+            <div class="specGrid">
+                <div class="spec"><small>Tổng máy lọc</small><strong><?= $paginator ? (int)$paginator->getTotalItemCount() : 0 ?></strong></div>
+                <div class="spec"><small>Trang hiện tại</small><strong><?= $paginator ? (int)count($paginator) : 0 ?></strong></div>
+                <div class="spec"><small>Giờ máy</small><strong>h</strong></div>
+                <div class="spec"><small>Trạng thái</small><strong>Live</strong></div>
+                <div class="spec"><small>Kho</small><strong>Ops</strong></div>
+                <div class="spec"><small>Bảo trì</small><strong>Watch</strong></div>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead"><strong>Thao tác nhanh</strong><span class="badge">Action</span></div>
+            <div class="specGrid">
+                <div class="spec"><small>Báo cáo</small><strong><a href="<?= $this->url('reports') ?>">Mở</a></strong></div>
+                <div class="spec"><small>Điều phối</small><strong><a href="<?= $this->url('dispatch-jobs') ?>">Mở</a></strong></div>
+                <div class="spec"><small>Bảo trì</small><strong><a href="<?= $this->url('maintenance-jobs') ?>">Mở</a></strong></div>
+            </div>
+        </article>
+    </div>
+</section>

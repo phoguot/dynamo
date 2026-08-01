@@ -1,0 +1,21 @@
+<?php
+/** @var Maintenance\Form\MaintenanceJob\MaintenanceJobSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['jobNo', 'generatorId', 'scheduleId', 'jobType', 'priority', 'triggerReason', 'triggerHourMeter', 'idempotencyKey', 'scheduledDate', 'assigneeId', 'laborCost', 'findings']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-maintenance-job']) ?>
+    <?= $row(['name' => 'jobNo', 'label' => 'Số phiếu', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'scheduleId', 'label' => 'ID lịch bảo trì', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'jobType', 'label' => 'Loại phiếu', 'control' => 'select', 'required' => true, 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'priority', 'label' => 'Ưu tiên', 'control' => 'select', 'required' => true, 'choices' => $form->priorityChoices()]) ?>
+    <?= $row(['name' => 'triggerReason', 'label' => 'Lý do phát sinh', 'attrs' => ['maxlength' => 255]]) ?>
+    <?= $row(['name' => 'triggerHourMeter', 'label' => 'Giờ máy kích hoạt', 'type' => 'number', 'attrs' => ['min' => 0, 'step' => '0.1']]) ?>
+    <?= $row(['name' => 'idempotencyKey', 'label' => 'Idempotency key', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'scheduledDate', 'label' => 'Ngày lên lịch', 'type' => 'date']) ?>
+    <?= $row(['name' => 'assigneeId', 'label' => 'ID người thực hiện', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'laborCost', 'label' => 'Chi phí công thợ', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'findings', 'label' => 'Kết quả kiểm tra', 'control' => 'textarea', 'attrs' => ['rows' => 5, 'maxlength' => 5000]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $job ? 'Lưu thay đổi' : 'Thêm phiếu', 'cancelUrl' => $this->url('maintenance-jobs')]) ?>
+<?= $this->partial('partial/form/close') ?>

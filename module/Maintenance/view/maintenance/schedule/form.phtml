@@ -1,0 +1,11 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Maintenance\Model\Schedule\ScheduleModel|null $schedule
+ * @var Maintenance\Form\Schedule\ScheduleSaveForm $saveForm
+ * @var array<string, string> $errors
+ */
+$this->headTitle($schedule ? 'Sửa lịch bảo trì' : 'Thêm lịch bảo trì');
+?>
+<h1><?= $schedule ? 'Sửa lịch bảo trì' : 'Thêm lịch bảo trì' ?></h1>
+<?= $this->partial('partial/schedule/save-form', ['form' => $saveForm, 'schedule' => $schedule, 'errors' => $errors]) ?>

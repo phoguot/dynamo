@@ -1,0 +1,25 @@
+<?php
+/**
+ * Trang thêm mới / sửa tài khoản. Chỉ dựng khung, markup form nằm ở partial.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserSaveForm $saveForm
+ * @var User\Model\User\UserModel|null $user
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $user !== null;
+
+$this->headTitle($isEdit ? 'Sửa người dùng' : 'Thêm người dùng');
+?>
+<h1><?= $isEdit ? 'Sửa tài khoản' : 'Thêm tài khoản' ?></h1>
+<?php if ($isEdit): ?>
+    <p><?= $this->escapeHtml((string)$user->getFullName()) ?>
+        (<?= $this->escapeHtml((string)$user->getUsername()) ?>)</p>
+<?php endif; ?>
+
+<?= $this->partial('partial/user/save-form', [
+    'form'   => $saveForm,
+    'user'   => $user,
+    'errors' => $errors,
+]) ?>

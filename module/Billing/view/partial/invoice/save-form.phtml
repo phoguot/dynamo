@@ -1,0 +1,20 @@
+<?php
+/** @var Billing\Form\Invoice\InvoiceSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['invoiceNo', 'customerId', 'contractId', 'rentalOrderId', 'periodFrom', 'periodTo', 'issueDate', 'dueDate', 'discountAmount', 'vatRate', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-invoice']) ?>
+    <?= $row(['name' => 'invoiceNo', 'label' => 'Số hóa đơn', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'contractId', 'label' => 'ID hợp đồng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'rentalOrderId', 'label' => 'ID đơn thuê', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'periodFrom', 'label' => 'Từ ngày', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'periodTo', 'label' => 'Đến ngày', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'issueDate', 'label' => 'Ngày phát hành', 'type' => 'date']) ?>
+    <?= $row(['name' => 'dueDate', 'label' => 'Hạn thanh toán', 'type' => 'date']) ?>
+    <?= $row(['name' => 'discountAmount', 'label' => 'Giảm giá', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'vatRate', 'label' => 'VAT (%)', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 4, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $invoice ? 'Lưu thay đổi' : 'Thêm hóa đơn', 'cancelUrl' => $this->url('invoices')]) ?>
+<?= $this->partial('partial/form/close') ?>

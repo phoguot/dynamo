@@ -1,0 +1,31 @@
+<?php
+$this->headTitle('Hạn mức công nợ');
+$filters = $searchForm->getSubmittedData();
+?>
+<h1>Hạn mức công nợ</h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php if ($canCreate): ?><p><a href="<?= $this->url('credit-limits', ['action' => 'create']) ?>">Thêm hạn mức</a></p><?php endif; ?>
+<?= $this->partial('partial/credit-limit/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+<?php if ($paginator === null || count($paginator) === 0): ?>
+    <p>Chưa có hạn mức nào khớp điều kiện lọc.</p>
+<?php else: ?>
+    <table>
+        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> dòng hạn mức</caption>
+        <thead><tr><th>Khách hàng</th><th>Hạn mức</th><th>Công nợ</th><th>Nợ quá hạn</th><th>Chặn</th><th>Lần kiểm tra</th><th>Thao tác</th></tr></thead>
+        <tbody><?php foreach ($paginator as $item): ?><tr>
+            <td>#<?= (int)$item->getCustomerId() ?></td>
+            <td><?= number_format($item->getCreditLimit(), 0, ',', '.') ?> đ</td>
+            <td><?= number_format($item->getCurrentDebt(), 0, ',', '.') ?> đ</td>
+            <td><?= number_format($item->getOverdueAmount(), 0, ',', '.') ?> đ</td>
+            <td><?= $item->isBlocked() ? 'Có' : 'Không' ?></td>
+            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($item->getLastCheckedAt())) ?></td>
+            <td><a href="<?= $this->url('credit-limits', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a><?php if ($canEdit): ?> <a href="<?= $this->url('credit-limits', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+    <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+    <nav aria-label="Phân trang"><p>Trang <?= $currentPage ?> / <?= $totalPages ?></p>
+        <?php if ($currentPage > 1): ?><a href="<?= $this->url('credit-limits') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+        <?php if ($currentPage < $totalPages): ?><a href="<?= $this->url('credit-limits') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+    </nav>
+<?php endif; ?>

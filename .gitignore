@@ -1,0 +1,46 @@
+# Cấu hình cá nhân — không commit
+CLAUDE.local.md
+.claude/settings.local.json
+.env
+.env.*
+!.env.example
+/.claude/
+/.codex/
+/.agents/skills/
+/AGENTS.md
+/CLAUDE.md
+CLAUDE.local.md
+*.md
+!/README.md
+/docs/
+.mcp.json
+.hallmark/
+# Node
+node_modules/
+
+# PHP / Composer
+/vendor/
+config/autoload/local.php
+config/autoload/*.local.php
+.phpunit.cache/
+phpunit.xml
+
+# Sản phẩm build
+dist/
+build/
+
+# Hệ điều hành / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dữ liệu thật, dump, log
+*.log
+*.sql.gz
+/tmp/
+/storage/
+
+# Cache sinh ra lúc chạy
+/data/cache/*
+!/data/cache/.gitkeep

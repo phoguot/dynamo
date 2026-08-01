@@ -1,0 +1,18 @@
+<?php
+/** @var Maintenance\Form\Schedule\ScheduleSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['generatorId', 'scheduleType', 'intervalHours', 'intervalDays', 'lastServiceHour', 'lastServiceDate', 'nextDueHour', 'nextDueDate', 'isActive']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-maintenance-schedule']) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'scheduleType', 'label' => 'Loại lịch', 'control' => 'select', 'required' => true, 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'intervalHours', 'label' => 'Chu kỳ giờ máy', 'type' => 'number', 'attrs' => ['min' => 0, 'step' => '0.1']]) ?>
+    <?= $row(['name' => 'intervalDays', 'label' => 'Chu kỳ ngày', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'lastServiceHour', 'label' => 'Giờ bảo trì gần nhất', 'type' => 'number', 'attrs' => ['min' => 0, 'step' => '0.1']]) ?>
+    <?= $row(['name' => 'lastServiceDate', 'label' => 'Ngày bảo trì gần nhất', 'type' => 'date']) ?>
+    <?= $row(['name' => 'nextDueHour', 'label' => 'Giờ tới hạn', 'type' => 'number', 'attrs' => ['min' => 0, 'step' => '0.1']]) ?>
+    <?= $row(['name' => 'nextDueDate', 'label' => 'Ngày tới hạn', 'type' => 'date']) ?>
+    <?= $row(['name' => 'isActive', 'label' => 'Đang dùng', 'control' => 'select', 'choices' => [1 => 'Có', 0 => 'Không']]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $schedule ? 'Lưu thay đổi' : 'Thêm lịch', 'cancelUrl' => $this->url('maintenance-schedules')]) ?>
+<?= $this->partial('partial/form/close') ?>

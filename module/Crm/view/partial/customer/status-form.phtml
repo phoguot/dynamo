@@ -1,0 +1,21 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Customer\CustomerStatusForm $form
+ * @var Crm\Model\Customer\CustomerModel $customer
+ * @var array<string, string> $errors
+ */
+
+$values = ['status' => $customer->getStatus()];
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'action' => $this->url('customers', ['action' => 'changestatus', 'id' => (int)$customer->getId()]),
+]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices()]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Cập nhật trạng thái']) ?>
+<?= $this->partial('partial/form/close') ?>

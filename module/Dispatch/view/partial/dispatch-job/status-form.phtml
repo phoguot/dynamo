@@ -1,0 +1,14 @@
+<?php
+/** @var Dispatch\Form\DispatchJob\DispatchJobStatusForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Chuyen sang', 'control' => 'select', 'required' => true, 'choices' => $nextStatuses]) ?>
+    <?= $row(['name' => 'startHourMeter', 'label' => 'Chi so dau / may moi', 'attrs' => ['type' => 'number', 'step' => '0.1', 'min' => '0']]) ?>
+    <?= $row(['name' => 'endHourMeter', 'label' => 'Chi so cuoi / may cu', 'attrs' => ['type' => 'number', 'step' => '0.1', 'min' => '0']]) ?>
+    <?= $row(['name' => 'actualEndDate', 'label' => 'Ngay thu hoi / doi may', 'attrs' => ['type' => 'date']]) ?>
+    <?= $row(['name' => 'failReason', 'label' => 'Ly do that bai', 'attrs' => ['maxlength' => 500]]) ?>
+    <?= $row(['name' => 'feeBearer', 'label' => 'Ben chiu phi', 'control' => 'select', 'choices' => $form->feeBearerChoices(), 'emptyChoice' => 'Chua chon']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Cap nhat trang thai']) ?>
+<?= $this->partial('partial/form/close') ?>

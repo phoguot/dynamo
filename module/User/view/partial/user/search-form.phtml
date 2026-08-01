@@ -1,0 +1,56 @@
+<?php
+/**
+ * MARKUP filter bar của trang danh sách người dùng.
+ *
+ * Gửi bằng GET để link lọc chia sẻ được và nút Back hoạt động đúng ⇒ không có CSRF
+ * (partial/form/open tự bỏ qua token khi method=get).
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserSearchForm $form
+ * @var array<string, string> $errors
+ */
+
+$values = $form->getSubmittedData();
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'method' => 'get',
+    'action' => $this->url('users'),
+    'class'  => 'filter-bar',
+]) ?>
+
+    <?= $row([
+        'name'  => 'keyword',
+        'label' => 'Tìm theo tên đăng nhập, họ tên hoặc email',
+        'type'  => 'search',
+        'attrs' => ['maxlength' => 120],
+    ]) ?>
+
+    <?= $row([
+        'name'        => 'role',
+        'label'       => 'Vai trò',
+        'control'     => 'select',
+        'choices'     => $form->roleChoices(),
+        'emptyChoice' => 'Tất cả',
+    ]) ?>
+
+    <?= $row([
+        'name'        => 'status',
+        'label'       => 'Trạng thái',
+        'control'     => 'select',
+        'choices'     => $form->statusChoices(),
+        'emptyChoice' => 'Tất cả',
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Lọc',
+        'cancelUrl'   => $this->url('users'),
+        'cancelLabel' => 'Xóa lọc',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

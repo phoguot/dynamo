@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+// Copy file này thành local.php (không commit) và điền giá trị theo máy của bạn.
+return [
+    'db' => [
+        'hostname' => 'localhost',
+        'database' => 'dynamo_rental',
+        'username' => 'root',
+        'password' => '',
+        'port'     => 3306,
+    ],
+];

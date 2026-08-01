@@ -1,0 +1,28 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Customer\CustomerSearchForm $form
+ * @var array<string, string> $errors
+ */
+
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'method' => 'get',
+    'action' => $this->url('customers'),
+    'class'  => 'filter-bar',
+]) ?>
+    <?= $row(['name' => 'keyword', 'label' => 'Tìm theo mã, tên, MST hoặc điện thoại', 'type' => 'search', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'customerType', 'label' => 'Loại khách', 'control' => 'select', 'choices' => $form->typeChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Lọc',
+        'cancelUrl'   => $this->url('customers'),
+        'cancelLabel' => 'Xóa lọc',
+    ]) ?>
+<?= $this->partial('partial/form/close') ?>

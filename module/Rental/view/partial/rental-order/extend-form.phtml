@@ -1,0 +1,9 @@
+<?php
+/** @var Rental\Form\RentalOrder\RentalOrderExtendForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action]) ?>
+    <?= $row(['name' => 'expectedEndDate', 'label' => 'Ngày kết thúc mới', 'type' => 'date', 'required' => true]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Gia hạn']) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,36 @@
+<?php
+/** @var Sales\Form\Quote\QuoteSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['quoteNo', 'customerId', 'siteId', 'priceListId', 'rentFrom', 'rentTo', 'validUntil', 'rentAmount', 'deliveryFee', 'installFee', 'otherFee', 'discountAmount', 'vatRate', 'vatAmount', 'depositAmount', 'terms']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-quote']) ?>
+    <?= $row(['name' => 'quoteNo', 'label' => 'Số báo giá', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'siteId', 'label' => 'ID công trình', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <input type="hidden" name="priceListId" value="<?= $this->escapeHtmlAttr((string)($values['priceListId'] ?? '')) ?>">
+    <?= $row(['name' => 'rentFrom', 'label' => 'Thuê từ', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'rentTo', 'label' => 'Thuê đến', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'validUntil', 'label' => 'Hiệu lực báo giá đến', 'type' => 'date']) ?>
+
+    <?= $row([
+        'name'    => 'terms',
+        'label'   => 'Checklist / rule tự nhập',
+        'control' => 'textarea',
+        'hint'    => 'Nhập tự do rule giá, điều kiện áp giá, ngoại lệ, ghi chú giảm giá/cọc/VAT. Không cần theo bảng giá mẫu.',
+        'attrs'   => [
+            'rows'        => 7,
+            'placeholder' => "Ví dụ:\n- Giá thuê theo thỏa thuận từng máy\n- Phí vận chuyển tính riêng theo tuyến\n- Cọc/giảm giá tùy khách hàng và thời điểm",
+        ],
+    ]) ?>
+
+    <?= $row(['name' => 'rentAmount', 'label' => 'Tiền thuê nhập tay', 'type' => 'number', 'hint' => 'Nhập số tiền thực tế đã chốt, không tự tính theo bảng giá.', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'deliveryFee', 'label' => 'Phí vận chuyển nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'installFee', 'label' => 'Phí lắp đặt nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'otherFee', 'label' => 'Phí khác nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'discountAmount', 'label' => 'Giảm giá nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'vatRate', 'label' => 'VAT (%) nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'vatAmount', 'label' => 'Tiền VAT nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'depositAmount', 'label' => 'Tiền cọc nhập tay', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $quote ? 'Lưu thay đổi' : 'Thêm báo giá', 'cancelUrl' => $this->url('quotes')]) ?>
+<?= $this->partial('partial/form/close') ?>

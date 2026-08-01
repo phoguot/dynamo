@@ -1,0 +1,11 @@
+<?php
+/** @var Maintenance\Form\Schedule\ScheduleSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search-schedules']) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'scheduleType', 'label' => 'Loại lịch', 'control' => 'select', 'choices' => $form->typeChoices()]) ?>
+    <?= $row(['name' => 'isActive', 'label' => 'Đang dùng', 'control' => 'select', 'choices' => [1 => 'Có', 0 => 'Không'], 'emptyChoice' => 'Tất cả']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc', 'cancelUrl' => $this->url('maintenance-schedules'), 'cancelLabel' => 'Xóa lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,13 @@
+<?php
+/** @var Billing\Form\Invoice\InvoiceSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search-invoices']) ?>
+    <?= $row(['name' => 'keyword', 'label' => 'Số hóa đơn', 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'contractId', 'label' => 'ID hợp đồng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'rentalOrderId', 'label' => 'ID đơn thuê', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices()]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc', 'cancelUrl' => $this->url('invoices'), 'cancelLabel' => 'Xóa lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

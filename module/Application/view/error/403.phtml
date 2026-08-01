@@ -1,0 +1,13 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var string|null $message
+ */
+
+use Application\Model\AppMessage;
+
+$this->headTitle('Không có quyền truy cập');
+?>
+<h1>403 — Không có quyền truy cập</h1>
+<p><?= $this->escapeHtml($message ?? AppMessage::COMMON_403) ?></p>
+<p><a href="<?= $this->url('home') ?>"><?= $this->escapeHtml(AppMessage::COMMON_BACK_TO_HOME) ?></a></p>

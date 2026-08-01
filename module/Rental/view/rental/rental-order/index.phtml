@@ -1,0 +1,84 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Rental\Form\RentalOrder\RentalOrderSearchForm $searchForm
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var array<string, string> $errors
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Đơn thuê');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Vòng đời đơn thuê</h1>
+        <p>Theo dõi đơn thuê từ giữ máy, giao nhận, vận hành đến thu hồi và quyết toán.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canEdit): ?><a class="button primary" href="<?= $this->url('rental-orders', ['action' => 'create']) ?>">Thêm đơn thuê</a><?php endif; ?>
+        <a class="button" href="<?= $this->url('dispatch-jobs') ?>">Lệnh giao/thu</a>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<section class="grid">
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Bộ lọc đơn thuê</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/rental-order/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead">
+                <strong>Danh sách đơn thuê</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> đơn thuê</span><?php endif; ?>
+            </div>
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có đơn thuê nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <table>
+                    <thead><tr><th scope="col">Số</th><th scope="col">Khách hàng</th><th scope="col">Máy</th><th scope="col">Thời gian thuê</th><th scope="col">Trạng thái</th><th scope="col">Đơn giá</th><th scope="col">Thao tác</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($paginator as $item): ?>
+                        <tr>
+                            <td><code><?= $this->escapeHtml((string)$item->getOrderNo()) ?></code></td>
+                            <td>#<?= (int)$item->getCustomerId() ?></td>
+                            <td>#<?= (int)$item->getGeneratorId() ?></td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getStartDate())) ?> → <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getExpectedEndDate())) ?></td>
+                            <td><span class="badge run"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                            <td><?= number_format((int)$item->getUnitPrice(), 0, ',', '.') ?></td>
+                            <td>
+                                <a href="<?= $this->url('rental-orders', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                                <?php if ($canEdit): ?> <a href="<?= $this->url('rental-orders', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?><a class="button" href="<?= $this->url('rental-orders') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?><a class="button" href="<?= $this->url('rental-orders') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Vòng đời đơn thuê</strong><span class="badge">Flow</span></div>
+            <div class="specGrid">
+                <div class="spec"><small>1</small><strong>Tạo từ hợp đồng</strong></div>
+                <div class="spec"><small>2</small><strong>Giao máy</strong></div>
+                <div class="spec"><small>3</small><strong>Vận hành</strong></div>
+                <div class="spec"><small>4</small><strong>Thu hồi</strong></div>
+                <div class="spec"><small>5</small><strong>Quyết toán</strong></div>
+                <div class="spec"><small>Tổng lọc</small><strong><?= $paginator ? (int)$paginator->getTotalItemCount() : 0 ?></strong></div>
+            </div>
+        </article>
+    </div>
+</section>

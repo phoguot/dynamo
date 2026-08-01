@@ -1,0 +1,11 @@
+<?php
+/** @var Sales\Form\Quote\QuoteStatusForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Chuyển sang', 'control' => 'select', 'required' => true, 'choices' => $nextStatuses]) ?>
+    <?= $row(['name' => 'rejectReason', 'label' => 'Lý do từ chối', 'attrs' => ['maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Cập nhật trạng thái']) ?>
+<?= $this->partial('partial/form/close') ?>
+

@@ -1,0 +1,11 @@
+<?php
+/** @var Dispatch\Form\Vehicle\VehicleSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search']) ?>
+    <?= $row(['name' => 'keyword', 'label' => 'Mã xe / biển số', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'vehicleType', 'label' => 'Loại xe', 'control' => 'select', 'choices' => $form->typeChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

@@ -1,0 +1,20 @@
+<?php
+/** @var Rental\Form\RentalOrder\RentalOrderSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['orderNo', 'contractId', 'customerId', 'siteId', 'generatorId', 'startDate', 'expectedEndDate', 'unitPrice', 'durationTier', 'withOperator', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-rental-order']) ?>
+    <?= $row(['name' => 'orderNo', 'label' => 'Số đơn thuê', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'contractId', 'label' => 'ID hợp đồng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'siteId', 'label' => 'ID công trình', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'generatorId', 'label' => 'ID máy', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'startDate', 'label' => 'Ngày bắt đầu', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'expectedEndDate', 'label' => 'Ngày kết thúc dự kiến', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'unitPrice', 'label' => 'Đơn giá', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'durationTier', 'label' => 'Bậc thời hạn', 'control' => 'select', 'required' => true, 'choices' => $form->durationChoices()]) ?>
+    <?= $row(['name' => 'withOperator', 'label' => 'Thuê kèm người vận hành', 'control' => 'select', 'choices' => [0 => 'Không', 1 => 'Có']]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 4, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $order ? 'Lưu thay đổi' : 'Thêm đơn thuê', 'cancelUrl' => $this->url('rental-orders')]) ?>
+<?= $this->partial('partial/form/close') ?>

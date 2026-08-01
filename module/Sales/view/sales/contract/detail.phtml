@@ -1,0 +1,18 @@
+<?php $this->headTitle('Hợp đồng ' . (string)$contract->getContractNo()); ?>
+<h1>Hợp đồng <?= $this->escapeHtml((string)$contract->getContractNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('contracts') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('contracts', ['action' => 'edit', 'id' => (int)$contract->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Khách hàng</dt><dd>#<?= (int)$contract->getCustomerId() ?></dd>
+    <dt>Báo giá nguồn</dt><dd><?= $contract->getQuoteId() ? '#' . (int)$contract->getQuoteId() : '-' ?></dd>
+    <dt>Hiệu lực</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($contract->getEffectiveFrom())) ?> → <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($contract->getEffectiveTo())) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($contract->getStatusLabel()) ?></dd>
+    <dt>Chu kỳ hóa đơn</dt><dd><?= $this->escapeHtml($contract->getBillingCycleLabel()) ?></dd>
+    <dt>Tổng giá trị</dt><dd><?= number_format((int)$contract->getTotalAmount(), 0, ',', '.') ?> VND</dd>
+    <dt>Tiền cọc</dt><dd><?= number_format((int)$contract->getDepositAmount(), 0, ',', '.') ?> VND</dd>
+</dl>
+<?php if ($canEdit && $nextStatuses !== []): ?>
+    <h2>Đổi trạng thái</h2>
+    <?= $this->partial('partial/contract/status-form', ['form' => $statusForm, 'nextStatuses' => $nextStatuses, 'action' => $this->url('contracts', ['action' => 'changestatus', 'id' => (int)$contract->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>

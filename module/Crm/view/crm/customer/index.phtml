@@ -1,0 +1,101 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var Crm\Form\Customer\CustomerSearchForm $searchForm
+ * @var array<string, string> $errors
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Khách hàng');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Khách hàng</h1>
+        <p>Danh sách khách hàng, trạng thái giao dịch và cảnh báo công nợ.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canEdit): ?>
+            <a class="button primary" href="<?= $this->url('customers', ['action' => 'create']) ?>">Thêm khách hàng</a>
+        <?php endif; ?>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel filterPanel">
+            <div class="panelHead"><strong>Bộ lọc khách hàng</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/customer/search-form', [
+                'form'   => $searchForm,
+                'errors' => $errors,
+            ]) ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead">
+                <strong>Danh sách khách hàng</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> khách hàng</span><?php endif; ?>
+            </div>
+
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có khách hàng nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> khách hàng</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col">Mã</th>
+                            <th scope="col">Tên khách hàng</th>
+                            <th scope="col">Loại</th>
+                            <th scope="col">Điện thoại</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col">Công nợ</th>
+                            <th scope="col">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($paginator as $item): /** @var Crm\Model\Customer\CustomerModel $item */ ?>
+                            <tr>
+                                <td><?= $this->escapeHtml((string)$item->getCode()) ?></td>
+                                <td><?= $this->escapeHtml((string)$item->getName()) ?></td>
+                                <td><?= $this->escapeHtml($item->getTypeLabel()) ?></td>
+                                <td><?= $this->escapeHtml((string)$item->getMaskedPhone()) ?></td>
+                                <td><?= $this->escapeHtml((string)$item->getEmail()) ?></td>
+                                <td><span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                                <td><?= $item->getCreditWarning() ? 'Cần kiểm tra' : 'Bình thường' ?></td>
+                                <td>
+                                    <a href="<?= $this->url('customers', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                                    <?php if ($canEdit): ?>
+                                        <a href="<?= $this->url('customers', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?>
+                        <a class="button" href="<?= $this->url('customers') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a>
+                    <?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a class="button" href="<?= $this->url('customers') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

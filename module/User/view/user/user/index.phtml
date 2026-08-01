@@ -1,0 +1,103 @@
+<?php
+/**
+ * Danh sách người dùng.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var User\Form\User\UserSearchForm $searchForm
+ * @var array<string, string> $errors
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Người dùng và phân quyền');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Người dùng</h1>
+        <p>Tài khoản, vai trò và quyền truy cập từng module.</p>
+    </div>
+    <div class="actions">
+        <a class="button" href="<?= $this->url('audit-logs') ?>">Nhật ký kiểm toán</a>
+        <?php if ($canEdit): ?>
+            <a class="button primary" href="<?= $this->url('users', ['action' => 'create']) ?>">Thêm người dùng</a>
+        <?php endif; ?>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel filterPanel">
+            <div class="panelHead"><strong>Bộ lọc người dùng</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/user/search-form', [
+                'form'   => $searchForm,
+                'errors' => $errors,
+            ]) ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead">
+                <strong>Danh sách người dùng</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> tài khoản</span><?php endif; ?>
+            </div>
+
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có tài khoản nào khớp điều kiện lọc.<?= $canEdit ? ' Bấm "Thêm người dùng" để tạo tài khoản đầu tiên.' : '' ?></p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> tài khoản</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col">Tên đăng nhập</th>
+                            <th scope="col">Họ tên</th>
+                            <th scope="col">Vai trò</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col">Điện thoại</th>
+                            <th scope="col">Đăng nhập gần nhất</th>
+                            <th scope="col">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($paginator as $item): /** @var User\Model\User\UserModel $item */ ?>
+                            <tr>
+                                <td><?= $this->escapeHtml((string)$item->getUsername()) ?></td>
+                                <td><?= $this->escapeHtml((string)$item->getFullName()) ?></td>
+                                <td><?= $this->escapeHtml($item->getRoleLabel()) ?></td>
+                                <td><span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                                <td><?= $this->escapeHtml($item->getMaskedPhone()) ?></td>
+                                <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($item->getLastLoginAt(), 'Chưa từng')) ?></td>
+                                <td>
+                                    <a href="<?= $this->url('users', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                                    <?php if ($canEdit): ?>
+                                        <a href="<?= $this->url('users', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a>
+                                        <a href="<?= $this->url('permissions', ['action' => 'index', 'id' => (int)$item->getId()]) ?>">Phân quyền</a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?>
+                        <a class="button" href="<?= $this->url('users') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a>
+                    <?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a class="button" href="<?= $this->url('users') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

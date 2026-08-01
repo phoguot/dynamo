@@ -1,0 +1,70 @@
+<?php
+/**
+ * Ma trận phân quyền của MỘT người dùng — module × thao tác.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Model\User\UserModel $user
+ * @var User\Form\User\UserPermissionForm $permissionForm
+ * @var User\Form\User\UserPermissionResetForm $resetForm
+ * @var array<string, string[]> $roleDefaults
+ * @var array<string, string>   $overrides
+ * @var array<string, array<string, bool>> $effective
+ * @var bool $isAdminAccount
+ * @var array<string, string> $errors
+ *
+ * CHƯA CHỐT HỆ THIẾT KẾ (.claude/rules/ui.md).
+ */
+
+$this->headTitle('Phân quyền — ' . (string)$user->getFullName());
+?>
+<h1>Phân quyền</h1>
+<p><?= $this->escapeHtml((string)$user->getFullName()) ?>
+   (<?= $this->escapeHtml((string)$user->getUsername()) ?>) ·
+   vai trò <?= $this->escapeHtml($user->getRoleLabel()) ?></p>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<?php if ($isAdminAccount): ?>
+    <p role="alert">
+        Tài khoản Quản trị hệ thống luôn có toàn quyền và không phân quyền riêng được.
+        Muốn giới hạn thì đổi vai trò của tài khoản này trước.
+    </p>
+    <p><a href="<?= $this->url('users', ['action' => 'detail', 'id' => (int)$user->getId()]) ?>">Về chi tiết tài khoản</a></p>
+    <?php return; ?>
+<?php endif; ?>
+
+<h2>Cách đọc bảng</h2>
+<ul>
+    <li><strong>Mặc định vai trò</strong> — quyền mà vai trò
+        "<?= $this->escapeHtml($user->getRoleLabel()) ?>" đã có sẵn.</li>
+    <li><strong>Ngoại lệ</strong> — điều chỉnh riêng cho người này. Để trống nghĩa là theo vai trò.</li>
+    <li><strong>Kết quả</strong> — quyền thực tế sau khi cộng ngoại lệ vào mặc định.</li>
+</ul>
+<p>
+    Cấp thêm quyền cho một màn hình mà vai trò này không được phép vào sẽ không có tác dụng:
+    mỗi action phải được khai trong ACL; action chưa khai sẽ bị từ chối và không nằm ngoài kiểm soát.
+    không vượt qua được.
+</p>
+
+<?= $this->partial('partial/permission/matrix-form', [
+    'form'         => $permissionForm,
+    'user'         => $user,
+    'roleDefaults' => $roleDefaults,
+    'overrides'    => $overrides,
+    'effective'    => $effective,
+    'errors'       => $errors,
+]) ?>
+
+<h2>Gỡ toàn bộ ngoại lệ</h2>
+<p>Đưa tài khoản về đúng quyền mặc định của vai trò.</p>
+<?= $this->partial('partial/permission/reset-form', [
+    'form' => $resetForm,
+    'user' => $user,
+]) ?>
+
+<p><a href="<?= $this->url('users', ['action' => 'detail', 'id' => (int)$user->getId()]) ?>">Về chi tiết tài khoản</a></p>

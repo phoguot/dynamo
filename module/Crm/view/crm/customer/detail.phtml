@@ -1,0 +1,92 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Model\Customer\CustomerModel $customer
+ * @var Crm\Model\Site\SiteModel[] $sites
+ * @var Crm\Model\Contact\ContactModel[] $contacts
+ * @var Crm\Form\Customer\CustomerStatusForm $statusForm
+ * @var bool $canEdit
+ * @var array<string, string> $errors
+ */
+
+$this->headTitle('Khách hàng ' . (string)$customer->getCode());
+?>
+<h1><?= $this->escapeHtml((string)$customer->getCode()) ?> — <?= $this->escapeHtml((string)$customer->getName()) ?></h1>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<dl>
+    <dt>Loại khách hàng</dt>
+    <dd><?= $this->escapeHtml($customer->getTypeLabel()) ?></dd>
+    <dt>Trạng thái</dt>
+    <dd><?= $this->escapeHtml($customer->getStatusLabel()) ?></dd>
+    <dt>Mã số thuế</dt>
+    <dd><?= $this->escapeHtml((string)$customer->getMaskedTaxCode()) ?></dd>
+    <dt>CCCD</dt>
+    <dd><?= $this->escapeHtml((string)$customer->getMaskedIdNumber()) ?></dd>
+    <dt>Điện thoại</dt>
+    <dd><?= $this->escapeHtml((string)$customer->getMaskedPhone()) ?></dd>
+    <dt>Email</dt>
+    <dd><?= $this->escapeHtml((string)$customer->getEmail()) ?></dd>
+    <dt>Tài khoản ngân hàng</dt>
+    <dd><?= $this->escapeHtml((string)$customer->getMaskedBankAccount()) ?></dd>
+    <dt>Địa chỉ</dt>
+    <dd><?= $this->escapeHtml((string)$customer->getAddress()) ?></dd>
+    <dt>Ghi chú</dt>
+    <dd><?= (string)$customer->getNote() ?></dd>
+</dl>
+
+<?php if ($canEdit): ?>
+    <p><a href="<?= $this->url('customers', ['action' => 'edit', 'id' => (int)$customer->getId()]) ?>">Sửa khách hàng</a></p>
+    <?= $this->partial('partial/customer/status-form', [
+        'form'     => $statusForm,
+        'customer' => $customer,
+        'errors'   => $errors,
+    ]) ?>
+<?php endif; ?>
+
+<h2>Công trình</h2>
+<?php if ($canEdit): ?>
+    <p><a href="<?= $this->url('customer-sites', ['action' => 'create']) ?>?customerId=<?= (int)$customer->getId() ?>">Thêm công trình</a></p>
+<?php endif; ?>
+<?php if ($sites === []): ?>
+    <p>Chưa có công trình nào.</p>
+<?php else: ?>
+    <ul>
+        <?php foreach ($sites as $site): ?>
+            <li>
+                <?= $this->escapeHtml((string)$site->getName()) ?><?= $site->getAddress() ? ' — ' . $this->escapeHtml((string)$site->getAddress()) : '' ?>
+                <?php if ($canEdit): ?>
+                    <a href="<?= $this->url('customer-sites', ['action' => 'edit', 'id' => (int)$site->getId()]) ?>">Sửa</a>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<h2>Liên hệ</h2>
+<?php if ($canEdit): ?>
+    <p><a href="<?= $this->url('customer-contacts', ['action' => 'create']) ?>?customerId=<?= (int)$customer->getId() ?>">Thêm liên hệ</a></p>
+<?php endif; ?>
+<?php if ($contacts === []): ?>
+    <p>Chưa có liên hệ nào.</p>
+<?php else: ?>
+    <ul>
+        <?php foreach ($contacts as $contact): ?>
+            <li>
+                <?= $this->escapeHtml((string)$contact->getFullName()) ?><?= $contact->getPosition() ? ' — ' . $this->escapeHtml((string)$contact->getPosition()) : '' ?>
+                <?= $contact->getIsPrimary() ? ' — Chính' : '' ?>
+                <?php if ($canEdit): ?>
+                    <a href="<?= $this->url('customer-contacts', ['action' => 'edit', 'id' => (int)$contact->getId()]) ?>">Sửa</a>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<p><a href="<?= $this->url('customers') ?>">Về danh sách khách hàng</a></p>

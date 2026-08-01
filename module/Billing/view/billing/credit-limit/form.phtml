@@ -1,0 +1,3 @@
+<?php $this->headTitle($creditLimit ? 'Sửa hạn mức công nợ' : 'Thêm hạn mức công nợ'); ?>
+<h1><?= $creditLimit ? 'Sửa hạn mức công nợ' : 'Thêm hạn mức công nợ' ?></h1>
+<?= $this->partial('partial/credit-limit/save-form', ['form' => $saveForm, 'creditLimit' => $creditLimit, 'errors' => $errors]) ?>

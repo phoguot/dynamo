@@ -1,0 +1,70 @@
+<?php
+/**
+ * MARKUP filter bar của trang danh sách máy.
+ *
+ * Gửi bằng GET để link lọc chia sẻ được và nút Back hoạt động đúng ⇒ không có CSRF
+ * (partial/form/open tự bỏ qua token khi method=get).
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Fleet\Form\Generator\GeneratorSearchForm $form
+ * @var array<string, string> $errors
+ */
+
+$values = $form->getSubmittedData();
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'method' => 'get',
+    'action' => $this->url('generators'),
+    'class'  => 'filter-bar',
+]) ?>
+
+    <?= $row([
+        'name'  => 'keyword',
+        'label' => 'Tìm theo mã máy, tên hoặc serial',
+        'type'  => 'search',
+        'attrs' => ['maxlength' => 120],
+    ]) ?>
+
+    <?= $row([
+        'name'        => 'status',
+        'label'       => 'Trạng thái',
+        'control'     => 'select',
+        'choices'     => $form->statusChoices(),
+        'emptyChoice' => 'Tất cả',
+    ]) ?>
+
+    <?= $row([
+        'name'        => 'fuelType',
+        'label'       => 'Nhiên liệu',
+        'control'     => 'select',
+        'choices'     => $form->fuelChoices(),
+        'emptyChoice' => 'Tất cả',
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'capacityFrom',
+        'label' => 'Công suất từ (kVA)',
+        'type'  => 'number',
+        'attrs' => ['min' => 0],
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'capacityTo',
+        'label' => 'đến (kVA)',
+        'type'  => 'number',
+        'attrs' => ['min' => 0],
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Lọc',
+        'cancelUrl'   => $this->url('generators'),
+        'cancelLabel' => 'Xóa lọc',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

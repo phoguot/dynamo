@@ -1,0 +1,53 @@
+<?php
+/**
+ * MARKUP form đăng nhập.
+ *
+ * Field khai ở User\Form\Auth\LoginForm; tên field ở đây phải khớp tên khai trong form đó.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\Auth\LoginForm $form
+ * @var array<string, string> $errors
+ */
+
+$values = $form->getSubmittedData();
+
+/**
+ * KHÔNG bao giờ đổ mật khẩu ngược lại vào HTML: đăng nhập hỏng là lúc trang dễ bị chụp
+ * màn hình, lưu vào cache trình duyệt hoặc log proxy nhất. Người dùng gõ lại 8 ký tự rẻ
+ * hơn nhiều so với việc mật khẩu nằm trong `value=""`.
+ */
+unset($values['password']);
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+
+/** Field đã hiện lỗi ngay dưới ô nhập — không nhắc lại ở khối lỗi đầu form. */
+$fieldsWithOwnError = ['username', 'password'];
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => $fieldsWithOwnError]) ?>
+
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-login']) ?>
+
+    <?php /* Đường dẫn quay lại sau khi đăng nhập; LoginForm::safeNextUrl() lọc lại ở server. */ ?>
+    <input type="hidden" name="next" value="<?= $this->escapeHtmlAttr((string)($values['next'] ?? '')) ?>">
+
+    <?= $row([
+        'name'     => 'username',
+        'label'    => 'Tên đăng nhập',
+        'required' => true,
+        'attrs'    => ['maxlength' => 30, 'autocomplete' => 'username', 'autofocus' => true],
+    ]) ?>
+
+    <?= $row([
+        'name'     => 'password',
+        'label'    => 'Mật khẩu',
+        'type'     => 'password',
+        'required' => true,
+        'attrs'    => ['autocomplete' => 'current-password'],
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Đăng nhập']) ?>
+
+<?= $this->partial('partial/form/close') ?>

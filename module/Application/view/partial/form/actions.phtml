@@ -1,0 +1,25 @@
+<?php
+/**
+ * Hàng nút cuối form: nút chính bên trái, đường thoát bên phải.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var string $submitLabel
+ * @var string|null $cancelUrl
+ * @var string|null $cancelLabel
+ * @var string|null $confirm  câu xác nhận cho thao tác không hoàn tác được
+ */
+?>
+<div class="form-actions">
+    <button type="submit"
+        <?php if (!empty($confirm)): ?>
+            data-confirm="<?= $this->escapeHtmlAttr($confirm) ?>"
+        <?php endif; ?>>
+        <?= $this->escapeHtml($submitLabel) ?>
+    </button>
+
+    <?php if (!empty($cancelUrl)): ?>
+        <a href="<?= $this->escapeHtmlAttr($cancelUrl) ?>">
+            <?= $this->escapeHtml($cancelLabel ?? 'Hủy') ?>
+        </a>
+    <?php endif; ?>
+</div>

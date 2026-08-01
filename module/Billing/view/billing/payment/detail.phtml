@@ -1,0 +1,22 @@
+<?php
+$this->headTitle('Phiếu thu ' . (string)$payment->getPaymentNo());
+?>
+<h1>Phiếu thu <?= $this->escapeHtml((string)$payment->getPaymentNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('payments') ?>">Quay lại danh sách</a></p>
+<dl>
+    <dt>Hóa đơn</dt><dd><?= $payment->getInvoiceId() ? '#' . (int)$payment->getInvoiceId() : '-' ?></dd>
+    <dt>Khách hàng</dt><dd>#<?= (int)$payment->getCustomerId() ?></dd>
+    <dt>Số tiền</dt><dd><?= number_format($payment->getAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Ngày thanh toán</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($payment->getPaymentDate())) ?></dd>
+    <dt>Phương thức</dt><dd><?= $this->escapeHtml($payment->getMethodLabel()) ?></dd>
+    <dt>Mã tham chiếu</dt><dd><?= $payment->getReferenceNo() ? $this->escapeHtml((string)$payment->getReferenceNo()) : '-' ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($payment->getStatusLabel()) ?></dd>
+    <dt>Lý do hủy</dt><dd><?= $payment->getCancelReason() ? $this->escapeHtml((string)$payment->getCancelReason()) : '-' ?></dd>
+    <dt>Ghi chú</dt><dd><?= $payment->getNote() ? nl2br($this->escapeHtml((string)$payment->getNote())) : '-' ?></dd>
+</dl>
+<?php if ($canCancel && $payment->getStatus() !== Billing\Model\Payment\PaymentConst::STATUS_CANCELLED): ?>
+    <h2>Hủy phiếu thu</h2>
+    <?= $this->partial('partial/payment/cancel-form', ['form' => $cancelForm, 'action' => $this->url('payments', ['action' => 'cancel', 'id' => (int)$payment->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>

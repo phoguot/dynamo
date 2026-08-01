@@ -1,0 +1,10 @@
+<?php
+/** @var Billing\Form\CreditLimit\CreditLimitSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search-credit-limits']) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'isBlocked', 'label' => 'Đang chặn', 'control' => 'select', 'choices' => [1 => 'Có', 0 => 'Không']]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc', 'cancelUrl' => $this->url('credit-limits'), 'cancelLabel' => 'Xóa lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

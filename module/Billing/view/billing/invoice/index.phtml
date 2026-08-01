@@ -1,0 +1,61 @@
+<?php
+/** @var Billing\Form\Invoice\InvoiceSearchForm $searchForm */
+$this->headTitle('Hóa đơn');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Hóa đơn</h1>
+        <p>Theo dõi kỳ tính tiền, hạn thanh toán, số đã thu và số còn lại của từng hóa đơn.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canCreate): ?>
+            <a class="button primary" href="<?= $this->url('invoices', ['action' => 'create']) ?>">Thêm hóa đơn</a>
+        <?php endif; ?>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel filterPanel">
+            <div class="panelHead"><strong>Bộ lọc hóa đơn</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/invoice/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead">
+                <strong>Danh sách hóa đơn</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> hóa đơn</span><?php endif; ?>
+            </div>
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có hóa đơn nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> hóa đơn</caption>
+                        <thead><tr><th>Số</th><th>Khách hàng</th><th>Kỳ</th><th>Hạn thanh toán</th><th>Trạng thái</th><th>Tổng</th><th>Còn lại</th><th>Thao tác</th></tr></thead>
+                        <tbody><?php foreach ($paginator as $item): ?><tr>
+                            <td><?= $this->escapeHtml((string)$item->getInvoiceNo()) ?></td>
+                            <td>#<?= (int)$item->getCustomerId() ?></td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getPeriodFrom())) ?> - <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getPeriodTo())) ?></td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getDueDate())) ?></td>
+                            <td><span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                            <td><?= number_format($item->getTotalAmount(), 0, ',', '.') ?> đ</td>
+                            <td><?= number_format($item->getRemainAmount(), 0, ',', '.') ?> đ</td>
+                            <td><a href="<?= $this->url('invoices', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a><?php if ($canEdit): ?> <a href="<?= $this->url('invoices', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?></td>
+                        </tr><?php endforeach; ?></tbody>
+                    </table>
+                </div>
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?><a class="button" href="<?= $this->url('invoices') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?><a class="button" href="<?= $this->url('invoices') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

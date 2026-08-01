@@ -1,0 +1,104 @@
+<?php
+/**
+ * @var Sales\Model\Quote\QuoteModel $quote
+ * @var Sales\Model\QuoteLine\QuoteLineModel[] $lines
+ * @var array<string, string> $nextStatuses
+ * @var bool $canEdit
+ * @var array<string, string> $errors
+ */
+
+$this->headTitle('Báo giá ' . (string)$quote->getQuoteNo());
+$terms = trim((string)$quote->getTerms());
+?>
+
+<section class="pageHead">
+    <div>
+        <p class="sectionLabel">Báo giá</p>
+        <h1><?= $this->escapeHtml((string)$quote->getQuoteNo()) ?></h1>
+        <p>#<?= (int)$quote->getCustomerId() ?> · <?= $this->escapeHtml($quote->getStatusLabel()) ?></p>
+    </div>
+    <div class="actions">
+        <a class="button" href="<?= $this->url('quotes') ?>">Danh sách</a>
+        <?php if ($canEdit): ?>
+            <a class="button primary" href="<?= $this->url('quotes', ['action' => 'edit', 'id' => (int)$quote->getId()]) ?>">Sửa báo giá</a>
+        <?php endif; ?>
+    </div>
+</section>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="dashboardPanelGrid">
+    <article class="panel">
+        <div class="sectionLabel">Tổng tiền nhập tay</div>
+        <dl>
+            <dt>Thời gian thuê</dt>
+            <dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($quote->getRentFrom())) ?> đến <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($quote->getRentTo())) ?></dd>
+            <dt>Tiền thuê</dt>
+            <dd><?= number_format((int)$quote->getRentAmount(), 0, ',', '.') ?> VND</dd>
+            <dt>Phí vận chuyển</dt>
+            <dd><?= number_format((int)$quote->getDeliveryFee(), 0, ',', '.') ?> VND</dd>
+            <dt>Phí lắp đặt</dt>
+            <dd><?= number_format((int)$quote->getInstallFee(), 0, ',', '.') ?> VND</dd>
+            <dt>Phí khác</dt>
+            <dd><?= number_format((int)$quote->getOtherFee(), 0, ',', '.') ?> VND</dd>
+            <dt>Giảm giá</dt>
+            <dd><?= number_format((int)$quote->getDiscountAmount(), 0, ',', '.') ?> VND</dd>
+            <dt>VAT</dt>
+            <dd><?= (int)$quote->getVatRate() ?>% · <?= number_format((int)$quote->getVatAmount(), 0, ',', '.') ?> VND</dd>
+            <dt>Tiền cọc</dt>
+            <dd><?= number_format((int)$quote->getDepositAmount(), 0, ',', '.') ?> VND</dd>
+            <dt>Tổng tiền</dt>
+            <dd><?= number_format((int)$quote->getTotalAmount(), 0, ',', '.') ?> VND</dd>
+        </dl>
+    </article>
+
+    <article class="panel">
+        <div class="sectionLabel">Checklist / rule tự nhập</div>
+        <?php if ($terms === ''): ?>
+            <p>Chưa nhập checklist hoặc rule giá riêng cho báo giá này.</p>
+        <?php else: ?>
+            <div class="manualRules"><?= nl2br($this->escapeHtml($terms)) ?></div>
+        <?php endif; ?>
+    </article>
+</section>
+
+<?php if ($canEdit && $nextStatuses !== []): ?>
+    <section class="panel">
+        <h2>Đổi trạng thái</h2>
+        <?= $this->partial('partial/quote/status-form', [
+            'form'         => $statusForm,
+            'nextStatuses' => $nextStatuses,
+            'action'       => $this->url('quotes', ['action' => 'changestatus', 'id' => (int)$quote->getId()]),
+            'errors'       => $errors,
+        ]) ?>
+    </section>
+<?php endif; ?>
+
+<section class="panel">
+    <h2>Dòng báo giá</h2>
+    <?php if ($lines === []): ?>
+        <p>Không dùng dòng giá theo khuôn. Giá của báo giá này đang được nhập tay ở phần tổng tiền.</p>
+    <?php else: ?>
+        <table>
+            <thead>
+            <tr><th>kVA</th><th>Số lượng</th><th>Bậc</th><th>Đơn giá</th><th>Thành tiền</th></tr>
+            </thead>
+            <tbody>
+            <?php foreach ($lines as $line): ?>
+                <tr>
+                    <td><?= (int)$line->getCapacityKva() ?></td>
+                    <td><?= (int)$line->getQuantity() ?></td>
+                    <td><?= $this->escapeHtml($line->getDurationLabel()) ?></td>
+                    <td><?= number_format((int)$line->getUnitPrice(), 0, ',', '.') ?></td>
+                    <td><?= number_format((int)$line->getLineAmount(), 0, ',', '.') ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</section>

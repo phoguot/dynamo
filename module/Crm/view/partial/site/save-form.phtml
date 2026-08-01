@@ -1,0 +1,36 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Site\SiteSaveForm $form
+ * @var Crm\Model\Customer\CustomerModel $customer
+ * @var Crm\Model\Site\SiteModel|null $site
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $site !== null;
+$values = $form->getSubmittedData();
+$customerId = (int)($values['customerId'] ?? $customer->getId());
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+$fieldsWithOwnError = ['code', 'name', 'address', 'latitude', 'longitude', 'contactName', 'contactPhone', 'installConditions', 'accessNote', 'status'];
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => $fieldsWithOwnError]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-site']) ?>
+    <input type="hidden" name="customerId" value="<?= $customerId ?>">
+    <?= $row(['name' => 'code', 'label' => 'Mã công trình', 'attrs' => ['maxlength' => 30]]) ?>
+    <?= $row(['name' => 'name', 'label' => 'Tên công trình', 'required' => true, 'attrs' => ['maxlength' => 200]]) ?>
+    <?= $row(['name' => 'address', 'label' => 'Địa chỉ', 'attrs' => ['maxlength' => 255]]) ?>
+    <?= $row(['name' => 'latitude', 'label' => 'Vĩ độ', 'type' => 'number', 'attrs' => ['step' => '0.000001']]) ?>
+    <?= $row(['name' => 'longitude', 'label' => 'Kinh độ', 'type' => 'number', 'attrs' => ['step' => '0.000001']]) ?>
+    <?= $row(['name' => 'contactName', 'label' => 'Người liên hệ tại công trình', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'contactPhone', 'label' => 'Điện thoại liên hệ', 'attrs' => ['maxlength' => 20]]) ?>
+    <?= $row(['name' => 'installConditions', 'label' => 'Điều kiện lắp đặt', 'control' => 'textarea', 'attrs' => ['rows' => 4]]) ?>
+    <?= $row(['name' => 'accessNote', 'label' => 'Ghi chú tiếp cận', 'control' => 'textarea', 'attrs' => ['maxlength' => 500, 'rows' => 3]]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices()]) ?>
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => $isEdit ? 'Lưu thay đổi' : 'Thêm công trình',
+        'cancelUrl'   => $this->url('customers', ['action' => 'detail', 'id' => $customerId]),
+    ]) ?>
+<?= $this->partial('partial/form/close') ?>

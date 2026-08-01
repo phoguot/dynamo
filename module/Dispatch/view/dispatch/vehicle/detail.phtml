@@ -1,0 +1,28 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Dispatch\Model\Vehicle\VehicleModel $vehicle
+ * @var array<string, string> $nextStatuses
+ * @var Dispatch\Form\Vehicle\VehicleStatusForm $statusForm
+ * @var bool $canEdit
+ * @var bool $canChangeStatus
+ * @var array<string, string> $errors
+ */
+$this->headTitle('Xe ' . (string)$vehicle->getCode());
+?>
+<h1>Xe <?= $this->escapeHtml((string)$vehicle->getCode()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('vehicles') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('vehicles', ['action' => 'edit', 'id' => (int)$vehicle->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Biển số</dt><dd><?= $this->escapeHtml((string)$vehicle->getPlateNumber()) ?></dd>
+    <dt>Loại xe</dt><dd><?= $this->escapeHtml($vehicle->getTypeLabel()) ?></dd>
+    <dt>Tải trọng</dt><dd><?= $vehicle->getCapacityKg() ? number_format((int)$vehicle->getCapacityKg(), 0, ',', '.') . ' kg' : '-' ?></dd>
+    <dt>Tài xế mặc định</dt><dd><?= $vehicle->getDriverId() ? '#' . (int)$vehicle->getDriverId() : '-' ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($vehicle->getStatusLabel()) ?></dd>
+    <dt>Ghi chú</dt><dd><?= $vehicle->getNote() ? $this->escapeHtml((string)$vehicle->getNote()) : '-' ?></dd>
+</dl>
+<?php if ($canChangeStatus && $nextStatuses !== []): ?>
+    <h2>Đổi trạng thái</h2>
+    <?= $this->partial('partial/vehicle/status-form', ['form' => $statusForm, 'nextStatuses' => $nextStatuses, 'action' => $this->url('vehicles', ['action' => 'changestatus', 'id' => (int)$vehicle->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>

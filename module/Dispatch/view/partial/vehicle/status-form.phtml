@@ -1,0 +1,9 @@
+<?php
+/** @var Dispatch\Form\Vehicle\VehicleStatusForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'action' => $action]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Chuyển sang', 'control' => 'select', 'required' => true, 'choices' => $nextStatuses]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Cập nhật trạng thái']) ?>
+<?= $this->partial('partial/form/close') ?>

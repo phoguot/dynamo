@@ -1,0 +1,61 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Maintenance\Model\MaintenanceJob\MaintenanceJobModel $job
+ * @var Maintenance\Model\PartUsed\PartUsedModel[] $parts
+ * @var array<string, string> $nextStatuses
+ * @var Maintenance\Form\MaintenanceJob\MaintenanceJobStatusForm $statusForm
+ * @var Maintenance\Form\PartUsed\PartUsedSaveForm $partForm
+ * @var bool $canEdit
+ * @var bool $canChangeStatus
+ * @var bool $canAddPart
+ * @var bool $canDeletePart
+ * @var array<string, string> $errors
+ */
+$this->headTitle('Phiếu ' . (string)$job->getJobNo());
+?>
+<h1>Phiếu <?= $this->escapeHtml((string)$job->getJobNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('maintenance-jobs') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('maintenance-jobs', ['action' => 'edit', 'id' => (int)$job->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Máy</dt><dd>#<?= (int)$job->getGeneratorId() ?></dd>
+    <dt>Lịch bảo trì</dt><dd><?= $job->getScheduleId() ? '#' . (int)$job->getScheduleId() : '-' ?></dd>
+    <dt>Loại phiếu</dt><dd><?= $this->escapeHtml($job->getTypeLabel()) ?></dd>
+    <dt>Ưu tiên</dt><dd><?= $this->escapeHtml($job->getPriorityLabel()) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($job->getStatusLabel()) ?></dd>
+    <dt>Lý do phát sinh</dt><dd><?= $job->getTriggerReason() ? $this->escapeHtml((string)$job->getTriggerReason()) : '-' ?></dd>
+    <dt>Giờ máy kích hoạt</dt><dd><?= $job->getTriggerHourMeter() !== null ? $this->escapeHtml((string)$job->getTriggerHourMeter()) : '-' ?></dd>
+    <dt>Ngày lên lịch</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($job->getScheduledDate())) ?></dd>
+    <dt>Người thực hiện</dt><dd><?= $job->getAssigneeId() ? '#' . (int)$job->getAssigneeId() : '-' ?></dd>
+    <dt>Chi phí công thợ</dt><dd><?= number_format($job->getLaborCost(), 0, ',', '.') ?> đ</dd>
+    <dt>Chi phí phụ tùng</dt><dd><?= number_format($job->getPartsCost(), 0, ',', '.') ?> đ</dd>
+    <dt>Tổng chi phí</dt><dd><?= number_format($job->getTotalCost(), 0, ',', '.') ?> đ</dd>
+    <dt>Kết quả kiểm tra</dt><dd><?= $job->getFindings() ? nl2br($this->escapeHtml((string)$job->getFindings())) : '-' ?></dd>
+    <dt>Lý do hủy</dt><dd><?= $job->getCancelReason() ? $this->escapeHtml((string)$job->getCancelReason()) : '-' ?></dd>
+</dl>
+<?php if ($canChangeStatus && $nextStatuses !== []): ?>
+    <h2>Đổi trạng thái</h2>
+    <?= $this->partial('partial/maintenance-job/status-form', ['form' => $statusForm, 'nextStatuses' => $nextStatuses, 'action' => $this->url('maintenance-jobs', ['action' => 'changestatus', 'id' => (int)$job->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<h2>Phụ tùng đã dùng</h2>
+<?php if ($canAddPart): ?>
+    <?= $this->partial('partial/part-used/save-form', ['form' => $partForm, 'action' => $this->url('maintenance-jobs', ['action' => 'addpart', 'id' => (int)$job->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<?php if ($parts === []): ?>
+    <p>Chưa có phụ tùng nào trong phiếu này.</p>
+<?php else: ?>
+    <table>
+        <thead><tr><th>Mã</th><th>Tên</th><th>Số lượng</th><th>Đơn vị</th><th>Đơn giá</th><th>Thành tiền</th><th>Nhà cung cấp</th><th>Thao tác</th></tr></thead>
+        <tbody><?php foreach ($parts as $part): ?><tr>
+            <td><?= $part->getPartCode() ? $this->escapeHtml((string)$part->getPartCode()) : '-' ?></td>
+            <td><?= $this->escapeHtml((string)$part->getPartName()) ?></td>
+            <td><?= $this->escapeHtml((string)$part->getQuantity()) ?></td>
+            <td><?= $this->escapeHtml($part->getUnitLabel()) ?></td>
+            <td><?= number_format($part->getUnitPrice(), 0, ',', '.') ?> đ</td>
+            <td><?= number_format($part->getLineAmount(), 0, ',', '.') ?> đ</td>
+            <td><?= $part->getSupplier() ? $this->escapeHtml((string)$part->getSupplier()) : '-' ?></td>
+            <td><?php if ($canDeletePart): ?><form method="post" action="<?= $this->url('maintenance-jobs', ['action' => 'deletepart', 'id' => (int)$job->getId()]) ?>"><input type="hidden" name="partId" value="<?= (int)$part->getId() ?>"><?= $this->partial('partial/form/csrf', ['form' => $partForm]) ?><button type="submit">Xóa</button></form><?php else: ?>-<?php endif; ?></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+<?php endif; ?>

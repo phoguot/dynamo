@@ -1,0 +1,97 @@
+<?php
+/**
+ * MARKUP ma trận phân quyền: mỗi dòng là một thao tác của một màn hình.
+ *
+ * Không dùng `partial/form/row` ở đây: mỗi ô chọn nằm trong một ô của bảng chứ không phải
+ * một dòng nhãn–ô nhập–lỗi. Nhãn đi kèm là cột "Thao tác" của chính bảng, và ô chọn được
+ * gắn `aria-label` để người dùng trình đọc màn hình vẫn biết mình đang sửa quyền nào.
+ *
+ * Tên field gửi lên: `perm[<resource>|<privilege>]` — khớp User\Form\User\UserPermissionForm.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserPermissionForm $form
+ * @var User\Model\User\UserModel $user
+ * @var array<string, string[]> $roleDefaults resource => privilege[] mặc định của vai trò
+ * @var array<string, string>   $overrides    "resource|privilege" => effect đang lưu
+ * @var array<string, array<string, bool>> $effective resource => (privilege => được phép)
+ * @var array<string, string> $errors
+ */
+
+$effectChoices = $form->effectChoices();
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => []]) ?>
+
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'action' => $this->url('permissions', ['action' => 'save', 'id' => $user->getId()]),
+    'class'  => 'form-permission-matrix',
+]) ?>
+
+    <input type="hidden" name="userId" value="<?= (int)$user->getId() ?>">
+
+    <?php foreach ($form->permissionCatalog() as $module): ?>
+        <section>
+            <h3><?= $this->escapeHtml($module['label']) ?></h3>
+
+            <?php foreach ($module['resources'] as $resource => $meta): ?>
+                <table>
+                    <caption><?= $this->escapeHtml($meta['label']) ?></caption>
+                    <thead>
+                    <tr>
+                        <th scope="col">Thao tác</th>
+                        <th scope="col">Mặc định vai trò</th>
+                        <th scope="col">Ngoại lệ cho người này</th>
+                        <th scope="col">Kết quả</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($meta['privileges'] as $privilege => $privilegeLabel): ?>
+                        <?php
+                        $key       = $resource . '|' . $privilege;
+                        $isDefault = in_array($privilege, $roleDefaults[$resource] ?? [], true);
+                        $current   = $overrides[$key] ?? '';
+                        $isAllowed = $effective[$resource][$privilege] ?? false;
+                        $fieldName = 'perm[' . $key . ']';
+                        $fieldId   = 'perm-' . preg_replace('/[^a-z0-9]+/i', '-', $key);
+                        ?>
+                        <tr>
+                            <th scope="row">
+                                <label for="<?= $this->escapeHtmlAttr($fieldId) ?>">
+                                    <?= $this->escapeHtml($privilegeLabel) ?>
+                                </label>
+                            </th>
+                            <td><?= $isDefault ? 'Có' : 'Không' ?></td>
+                            <td>
+                                <select id="<?= $this->escapeHtmlAttr($fieldId) ?>"
+                                        name="<?= $this->escapeHtmlAttr($fieldName) ?>"
+                                        aria-label="<?= $this->escapeHtmlAttr(sprintf(
+                                            'Ngoại lệ quyền "%s" của màn hình %s',
+                                            $privilegeLabel,
+                                            $meta['label']
+                                        )) ?>">
+                                    <option value="">Theo vai trò</option>
+                                    <?php foreach ($effectChoices as $effectValue => $effectLabel): ?>
+                                        <option value="<?= $this->escapeHtmlAttr($effectValue) ?>"
+                                            <?= $current === $effectValue ? 'selected' : '' ?>>
+                                            <?= $this->escapeHtml($effectLabel) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                            <?php /* Không dùng màu làm tín hiệu duy nhất — luôn kèm chữ (.claude/rules/ui.md). */ ?>
+                            <td><?= $isAllowed ? 'Được phép' : 'Không được phép' ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endforeach; ?>
+        </section>
+    <?php endforeach; ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Lưu phân quyền',
+        'cancelUrl'   => $this->url('users', ['action' => 'detail', 'id' => $user->getId()]),
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>
+

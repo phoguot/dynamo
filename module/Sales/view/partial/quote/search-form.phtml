@@ -1,0 +1,12 @@
+<?php
+/** @var Sales\Form\Quote\QuoteSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search']) ?>
+    <?= $row(['name' => 'keyword', 'label' => 'Số báo giá', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'status', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => $form->statusChoices(), 'emptyChoice' => 'Tất cả']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc']) ?>
+<?= $this->partial('partial/form/close') ?>
+

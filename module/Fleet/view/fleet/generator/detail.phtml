@@ -1,0 +1,83 @@
+<?php
+/**
+ * Chi tiết một máy phát điện.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Fleet\Model\Generator\GeneratorModel $generator
+ * @var array<string, string> $nextStatuses
+ * @var Fleet\Form\Generator\GeneratorStatusForm $statusForm
+ * @var array<string, string> $errors
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Máy ' . (string)$generator->getCode());
+?>
+<h1><?= $this->escapeHtml((string)$generator->getCode()) ?> — <?= $this->escapeHtml((string)$generator->getName()) ?></h1>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="dashboardPanelGrid">
+    <article class="panel">
+        <div class="sectionLabel">Dữ liệu máy</div>
+        <dl>
+            <dt>Trạng thái</dt>
+            <dd><?= $this->escapeHtml($generator->getStatusLabel()) ?></dd>
+
+            <dt>Công suất</dt>
+            <dd><?= (int)$generator->getCapacityKva() ?> kVA</dd>
+
+            <dt>Nhiên liệu</dt>
+            <dd><?= $this->escapeHtml($generator->getFuelLabel()) ?></dd>
+
+            <dt>Số serial</dt>
+            <dd><?= $this->escapeHtml((string)$generator->getSerialNumber()) ?></dd>
+
+            <dt>Hãng / model</dt>
+            <dd><?= $this->escapeHtml(trim((string)$generator->getManufacturer() . ' ' . (string)$generator->getModel())) ?></dd>
+
+            <dt>Giờ máy tích lũy</dt>
+            <dd><?= number_format((float)$generator->getHourMeter(), 1) ?> giờ</dd>
+
+            <dt>Vị trí hiện tại</dt>
+            <dd><?= $this->escapeHtml((string)$generator->getCurrentLocation()) ?></dd>
+
+            <dt>Ghi chú</dt>
+            <dd><?= $this->escapeHtml((string)$generator->getNote()) ?></dd>
+        </dl>
+    </article>
+
+    <?php if ($canEdit): ?>
+        <article class="panel">
+            <div class="sectionLabel">Form thực hiện</div>
+            <p><a href="<?= $this->url('generators', ['action' => 'edit', 'id' => (int)$generator->getId()]) ?>">Sửa thông tin máy</a></p>
+
+            <h2>Chuyển trạng thái</h2>
+            <?= $this->partial('partial/generator/status-form', [
+                'form'         => $statusForm,
+                'generator'    => $generator,
+                'nextStatuses' => $nextStatuses,
+                'errors'       => $errors,
+            ]) ?>
+        </article>
+    <?php endif; ?>
+</section>
+
+<?php $specs = $generator->getExtraFieldsArray(); ?>
+<?php if ($specs !== []): ?>
+    <section class="panel">
+        <h2>Thông số kỹ thuật</h2>
+        <dl>
+            <?php foreach ($specs as $key => $value): ?>
+                <dt><?= $this->escapeHtml((string)$key) ?></dt>
+                <dd><?= $this->escapeHtml(is_bool($value) ? ($value ? 'Có' : 'Không') : (string)$value) ?></dd>
+            <?php endforeach; ?>
+        </dl>
+    </section>
+<?php endif; ?>
+
+<p><a href="<?= $this->url('generators') ?>">Về danh sách đội máy</a></p>

@@ -1,0 +1,10 @@
+<?php
+/** @var Reporting\Form\Report\FleetUtilizationSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-report-fleet']) ?>
+    <?= $row(['name' => 'reportDate', 'label' => 'Ngày báo cáo', 'type' => 'date']) ?>
+    <?= $row(['name' => 'warehouseCode', 'label' => 'Mã kho', 'attrs' => ['maxlength' => 32, 'autocomplete' => 'off']]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc khai thác', 'cancelUrl' => $this->url('reports'), 'cancelLabel' => 'Xóa lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

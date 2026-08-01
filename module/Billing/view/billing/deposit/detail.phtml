@@ -1,0 +1,18 @@
+<?php $this->headTitle('Phiếu cọc ' . (string)$deposit->getDepositNo()); ?>
+<h1>Phiếu cọc <?= $this->escapeHtml((string)$deposit->getDepositNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('deposits') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('deposits', ['action' => 'edit', 'id' => (int)$deposit->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Khách hàng</dt><dd>#<?= (int)$deposit->getCustomerId() ?></dd>
+    <dt>Hợp đồng</dt><dd><?= $deposit->getContractId() ? '#' . (int)$deposit->getContractId() : '-' ?></dd>
+    <dt>Đơn thuê</dt><dd><?= $deposit->getRentalOrderId() ? '#' . (int)$deposit->getRentalOrderId() : '-' ?></dd>
+    <dt>Số tiền cọc</dt><dd><?= number_format($deposit->getAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Ngày nhận</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($deposit->getReceivedDate())) ?></dd>
+    <dt>Đã bù trừ/trừ</dt><dd><?= number_format($deposit->getDeductedAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Lý do trừ</dt><dd><?= $deposit->getDeductReason() ? nl2br($this->escapeHtml((string)$deposit->getDeductReason())) : '-' ?></dd>
+    <dt>Đã hoàn</dt><dd><?= number_format($deposit->getRefundedAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Ngày hoàn</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($deposit->getRefundedDate())) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($deposit->getStatusLabel()) ?></dd>
+    <dt>Ghi chú</dt><dd><?= $deposit->getNote() ? nl2br($this->escapeHtml((string)$deposit->getNote())) : '-' ?></dd>
+</dl>

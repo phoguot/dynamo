@@ -1,0 +1,11 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Rental\Model\RentalOrder\RentalOrderModel|null $order
+ * @var Rental\Form\RentalOrder\RentalOrderSaveForm $saveForm
+ * @var array<string, string> $errors
+ */
+$this->headTitle($order ? 'Sửa đơn thuê' : 'Thêm đơn thuê');
+?>
+<h1><?= $order ? 'Sửa đơn thuê' : 'Thêm đơn thuê' ?></h1>
+<?= $this->partial('partial/rental-order/save-form', ['form' => $saveForm, 'order' => $order, 'errors' => $errors]) ?>

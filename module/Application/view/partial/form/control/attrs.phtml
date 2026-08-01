@@ -1,0 +1,23 @@
+<?php
+/**
+ * In các thuộc tính HTML phụ (maxlength, min, step, placeholder…) đã escape.
+ * Dùng chung cho input/select/textarea để không lặp vòng lặp escape ở ba nơi.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var array<string, string|int|bool> $attrs
+ */
+
+foreach (($attrs ?? []) as $attrName => $attrValue) {
+    if ($attrValue === false || $attrValue === null) {
+        continue;
+    }
+    if ($attrValue === true) {
+        echo ' ' . $this->escapeHtmlAttr((string)$attrName);
+        continue;
+    }
+    printf(
+        ' %s="%s"',
+        $this->escapeHtmlAttr((string)$attrName),
+        $this->escapeHtmlAttr((string)$attrValue)
+    );
+}

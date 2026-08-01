@@ -1,0 +1,150 @@
+<?php
+/**
+ * Layout chung cho mọi trang HTML.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ */
+
+$path = (string)($_SERVER['REQUEST_URI'] ?? '/');
+$path = '/' . ltrim(parse_url($path, PHP_URL_PATH) ?: '/', '/');
+$today = new DateTimeImmutable('now', new DateTimeZone('Asia/Bangkok'));
+$isAuthScreen = $path === '/login' || $path === '/';
+
+$isActive = static function (array $prefixes) use ($path): bool {
+    foreach ($prefixes as $prefix) {
+        if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+$navItems = [
+    ['code' => '01', 'route' => 'dashboard', 'label' => 'Tổng quan', 'prefixes' => ['/dashboard']],
+    ['code' => '02', 'route' => 'generators', 'label' => 'Đội máy', 'prefixes' => ['/generators']],
+    ['code' => '03', 'route' => 'customers', 'label' => 'Khách hàng', 'prefixes' => ['/customers', '/customer-sites', '/customer-contacts']],
+    ['code' => '04', 'route' => 'quotes', 'label' => 'Báo giá', 'prefixes' => ['/quotes']],
+    ['code' => '05', 'route' => 'rental-orders', 'label' => 'Đơn thuê', 'prefixes' => ['/rental-orders']],
+    ['code' => '06', 'route' => 'dispatch-jobs', 'label' => 'Điều phối', 'prefixes' => ['/dispatch-jobs', '/vehicles']],
+    ['code' => '07', 'route' => 'maintenance-jobs', 'label' => 'Bảo trì', 'prefixes' => ['/maintenance-jobs', '/maintenance-schedules']],
+    ['code' => '08', 'route' => 'invoices', 'label' => 'Tài chính', 'prefixes' => ['/invoices', '/payments', '/deposits', '/credit-limits']],
+    ['code' => '09', 'route' => 'reports', 'label' => 'Báo cáo', 'prefixes' => ['/reports']],
+    ['code' => '10', 'route' => 'users', 'label' => 'Thiết lập', 'prefixes' => ['/users', '/permissions', '/audit-logs']],
+];
+
+$moduleTabs = [
+    '/generators'            => ['route' => 'generators', 'label' => 'Đội máy', 'createLabel' => 'Tạo máy'],
+    '/customers'             => ['route' => 'customers', 'label' => 'Khách hàng', 'createLabel' => 'Tạo khách hàng'],
+    '/quotes'                => ['route' => 'quotes', 'label' => 'Báo giá', 'createLabel' => 'Tạo báo giá'],
+    '/contracts'             => ['route' => 'contracts', 'label' => 'Hợp đồng', 'createLabel' => 'Tạo hợp đồng'],
+    '/price-lists'           => ['route' => 'price-lists', 'label' => 'Bảng giá', 'createLabel' => 'Tạo bảng giá'],
+    '/rental-orders'         => ['route' => 'rental-orders', 'label' => 'Đơn thuê', 'createLabel' => 'Tạo đơn thuê'],
+    '/dispatch-jobs'         => ['route' => 'dispatch-jobs', 'label' => 'Điều phối', 'createLabel' => 'Tạo lệnh'],
+    '/vehicles'              => ['route' => 'vehicles', 'label' => 'Xe điều phối', 'createLabel' => 'Tạo xe'],
+    '/maintenance-jobs'      => ['route' => 'maintenance-jobs', 'label' => 'Bảo trì', 'createLabel' => 'Tạo phiếu'],
+    '/maintenance-schedules' => ['route' => 'maintenance-schedules', 'label' => 'Lịch bảo trì', 'createLabel' => 'Tạo lịch'],
+    '/invoices'              => ['route' => 'invoices', 'label' => 'Hóa đơn', 'createLabel' => 'Tạo hóa đơn'],
+    '/payments'              => ['route' => 'payments', 'label' => 'Phiếu thu', 'createLabel' => 'Tạo phiếu thu'],
+    '/deposits'              => ['route' => 'deposits', 'label' => 'Phiếu cọc', 'createLabel' => 'Tạo phiếu cọc'],
+    '/credit-limits'         => ['route' => 'credit-limits', 'label' => 'Hạn mức', 'createLabel' => 'Tạo hạn mức'],
+    '/reports'               => ['route' => 'reports', 'label' => 'Báo cáo', 'createLabel' => null],
+    '/users'                 => ['route' => 'users', 'label' => 'Người dùng', 'createLabel' => 'Tạo người dùng'],
+    '/audit-logs'            => ['route' => 'audit-logs', 'label' => 'Nhật ký kiểm toán', 'createLabel' => null],
+];
+
+$currentModuleTab = null;
+$currentModulePrefix = null;
+foreach ($moduleTabs as $prefix => $tab) {
+    if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+        $currentModuleTab = $tab;
+        $currentModulePrefix = $prefix;
+        break;
+    }
+}
+
+$isFormTab = preg_match('#/(create|edit)(/|$)#', $path) === 1;
+$isModuleListPage = $currentModulePrefix !== null && $path === $currentModulePrefix;
+?>
+<?= $this->doctype() ?>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <?= $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1') ?>
+    <?= $this->headTitle('Dynamo Rental')->setSeparator(' - ')->setAutoEscape(false) ?>
+    <?= $this->headLink()->prependStylesheet($this->basePath() . '/css/app.css') ?>
+</head>
+<body>
+<?php if ($isAuthScreen): ?>
+<?= $this->content ?>
+<?= $this->inlineScript()->prependFile($this->basePath() . '/js/app.js') ?>
+</body>
+</html>
+<?php return; ?>
+<?php endif; ?>
+
+<a class="skipLink" href="#main-content">Bỏ qua điều hướng</a>
+<div class="appShell appShell--signedIn">
+    <aside class="yard" id="app-yard" aria-label="Điều hướng chính">
+        <a class="mark" href="<?= $this->url('dashboard') ?>">
+            <span aria-hidden="true">DG</span>
+            <div>
+                <strong>Dynamo Rental</strong>
+                <small><?= $this->escapeHtml($today->format(\Application\Model\DateModel::DISPLAY_DATE_FORMAT)) ?> · ca vận hành</small>
+            </div>
+        </a>
+
+        <nav class="navStack">
+            <div class="railLabel">Màn hình</div>
+            <?php foreach ($navItems as $item): ?>
+                <?php $active = $isActive($item['prefixes']); ?>
+                <a class="navButton<?= $active ? ' active' : '' ?>"
+                   href="<?= $this->url($item['route']) ?>"
+                   <?= $active ? 'aria-current="page"' : '' ?>>
+                    <span><?= $this->escapeHtml($item['label']) ?></span>
+                    <span class="navCode"><?= $this->escapeHtml($item['code']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+    </aside>
+
+    <main class="main" id="main-content">
+        <div class="command">
+            <button class="navMenu" type="button" data-nav-toggle aria-controls="app-yard" aria-expanded="false">
+                Menu
+            </button>
+            <form class="headerSearch" action="<?= $this->url('generators') ?>" method="get" role="search">
+                <label class="srOnly" for="global-keyword">Tìm máy</label>
+                <input id="global-keyword" type="search" name="keyword" placeholder="Tìm mã máy, tên máy, công trình">
+                <button class="headerSearch__submit" type="submit">Tìm</button>
+            </form>
+            <a class="button reportButton" href="<?= $this->url('reports') ?>">Báo cáo</a>
+            <a class="button primary quickCreate" href="<?= $this->url('quotes', ['action' => 'create']) ?>">Tạo báo giá</a>
+            <a class="profileButton" href="<?= $this->url('profile') ?>" aria-label="Hồ sơ cá nhân">Hồ sơ</a>
+        </div>
+
+        <?php if ($currentModuleTab !== null): ?>
+            <nav class="moduleTabs" aria-label="<?= $this->escapeHtmlAttr((string)$currentModuleTab['label']) ?>">
+                <a class="moduleTab<?= !$isFormTab ? ' active' : '' ?>"
+                   href="<?= $this->url($currentModuleTab['route']) ?>"
+                   <?= !$isFormTab ? 'aria-current="page"' : '' ?>>
+                    Danh sách
+                </a>
+                <?php if ($currentModuleTab['createLabel'] !== null): ?>
+                    <a class="moduleTab<?= $isFormTab ? ' active' : '' ?>"
+                       href="<?= $this->url($currentModuleTab['route'], ['action' => 'create']) ?>"
+                       <?= $isFormTab ? 'aria-current="page"' : '' ?>>
+                        <?= $this->escapeHtml((string)$currentModuleTab['createLabel']) ?>
+                    </a>
+                <?php endif; ?>
+            </nav>
+        <?php endif; ?>
+
+        <div class="screen active<?= $isModuleListPage ? ' screen--moduleList' : '' ?>">
+            <?= $this->content ?>
+        </div>
+    </main>
+</div>
+<?= $this->inlineScript()->prependFile($this->basePath() . '/js/app.js') ?>
+</body>
+</html>

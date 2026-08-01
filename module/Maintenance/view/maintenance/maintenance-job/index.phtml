@@ -1,0 +1,70 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Maintenance\Form\MaintenanceJob\MaintenanceJobSearchForm $searchForm
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var array<string, string> $errors
+ * @var bool $canCreate
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Phiếu bảo trì');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Phiếu bảo trì</h1>
+        <p>Theo dõi lịch kiểm tra, sửa chữa, chi phí và trạng thái xử lý của từng máy.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canCreate): ?>
+            <a class="button primary" href="<?= $this->url('maintenance-jobs', ['action' => 'create']) ?>">Thêm phiếu</a>
+        <?php endif; ?>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel filterPanel">
+            <div class="panelHead"><strong>Bộ lọc phiếu bảo trì</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/maintenance-job/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead">
+                <strong>Danh sách phiếu bảo trì</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> phiếu</span><?php endif; ?>
+            </div>
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có phiếu nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> phiếu</caption>
+                        <thead><tr><th>Số</th><th>Máy</th><th>Loại</th><th>Ưu tiên</th><th>Ngày lịch</th><th>Người thực hiện</th><th>Trạng thái</th><th>Tổng chi phí</th><th>Thao tác</th></tr></thead>
+                        <tbody><?php foreach ($paginator as $item): ?><tr>
+                            <td><?= $this->escapeHtml((string)$item->getJobNo()) ?></td>
+                            <td>#<?= (int)$item->getGeneratorId() ?></td>
+                            <td><?= $this->escapeHtml($item->getTypeLabel()) ?></td>
+                            <td><?= $this->escapeHtml($item->getPriorityLabel()) ?></td>
+                            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($item->getScheduledDate())) ?></td>
+                            <td><?= $item->getAssigneeId() ? '#' . (int)$item->getAssigneeId() : '-' ?></td>
+                            <td><span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                            <td><?= number_format($item->getTotalCost(), 0, ',', '.') ?> đ</td>
+                            <td><a href="<?= $this->url('maintenance-jobs', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a><?php if ($canEdit): ?> <a href="<?= $this->url('maintenance-jobs', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?></td>
+                        </tr><?php endforeach; ?></tbody>
+                    </table>
+                </div>
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?><a class="button" href="<?= $this->url('maintenance-jobs') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?><a class="button" href="<?= $this->url('maintenance-jobs') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

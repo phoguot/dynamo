@@ -1,0 +1,11 @@
+<?php
+/** @var Sales\Form\PriceList\PriceListSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors ?? []]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-search']) ?>
+    <?= $row(['name' => 'keyword', 'label' => 'Tìm bảng giá', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'isActive', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => ['1' => 'Đang dùng', '0' => 'Ngưng dùng'], 'emptyChoice' => 'Tất cả']) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc']) ?>
+<?= $this->partial('partial/form/close') ?>
+

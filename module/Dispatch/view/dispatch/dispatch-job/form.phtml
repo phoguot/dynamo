@@ -1,0 +1,11 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Dispatch\Model\DispatchJob\DispatchJobModel|null $job
+ * @var Dispatch\Form\DispatchJob\DispatchJobSaveForm $saveForm
+ * @var array<string, string> $errors
+ */
+$this->headTitle($job ? 'Sửa lệnh' : 'Thêm lệnh');
+?>
+<h1><?= $job ? 'Sửa lệnh' : 'Thêm lệnh' ?></h1>
+<?= $this->partial('partial/dispatch-job/save-form', ['form' => $saveForm, 'job' => $job, 'errors' => $errors]) ?>

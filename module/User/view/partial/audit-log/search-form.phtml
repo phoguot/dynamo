@@ -1,0 +1,67 @@
+<?php
+/**
+ * MARKUP filter bar của trang đọc nhật ký kiểm toán.
+ *
+ * Gửi bằng GET để link lọc chia sẻ được và nút Back hoạt động đúng ⇒ không có CSRF
+ * (partial/form/open tự bỏ qua token khi method=get).
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\AuditLog\AuditLogSearchForm $form
+ * @var array<string, string> $errors
+ */
+
+$values = $form->getSubmittedData();
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'method' => 'get',
+    'action' => $this->url('audit-logs'),
+    'class'  => 'filter-bar',
+]) ?>
+
+    <?= $row([
+        'name'        => 'action',
+        'label'       => 'Hành động',
+        'control'     => 'select',
+        'choices'     => $form->actionChoices(),
+        'emptyChoice' => 'Tất cả',
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'objectType',
+        'label' => 'Bảng đối tượng (vd usr_users)',
+        'type'  => 'search',
+        'attrs' => ['maxlength' => 64, 'placeholder' => 'Tiền tố tên bảng'],
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'userId',
+        'label' => 'Mã người thực hiện',
+        'type'  => 'number',
+        'attrs' => ['min' => 1],
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'dateFrom',
+        'label' => 'Từ ngày (năm-tháng-ngày)',
+        'type'  => 'date',
+    ]) ?>
+
+    <?= $row([
+        'name'  => 'dateTo',
+        'label' => 'Đến ngày (năm-tháng-ngày)',
+        'type'  => 'date',
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Lọc',
+        'cancelUrl'   => $this->url('audit-logs'),
+        'cancelLabel' => 'Xóa lọc',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

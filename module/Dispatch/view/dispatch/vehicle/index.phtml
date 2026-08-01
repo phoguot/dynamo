@@ -1,0 +1,85 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Dispatch\Form\Vehicle\VehicleSearchForm $searchForm
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var array<string, string> $errors
+ * @var bool $canCreate
+ * @var bool $canEdit
+ */
+
+$this->headTitle('Xe điều phối');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Xe điều phối</h1>
+        <p>Quản lý xe vận chuyển, biển số, tải trọng, tài xế mặc định và trạng thái khai thác.</p>
+    </div>
+    <div class="actions">
+        <?php if ($canCreate): ?>
+            <a class="button primary" href="<?= $this->url('vehicles', ['action' => 'create']) ?>">Thêm xe</a>
+        <?php endif; ?>
+        <a class="button" href="<?= $this->url('dispatch-jobs') ?>">Lệnh điều phối</a>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead"><strong>Bộ lọc xe</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/vehicle/search-form', ['form' => $searchForm, 'errors' => $errors]) ?>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead">
+                <strong>Danh sách xe điều phối</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> xe</span><?php endif; ?>
+            </div>
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có xe nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> xe</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col">Mã</th>
+                            <th scope="col">Biển số</th>
+                            <th scope="col">Loại</th>
+                            <th scope="col">Tải trọng</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($paginator as $item): ?>
+                            <tr>
+                                <td><code><?= $this->escapeHtml((string)$item->getCode()) ?></code></td>
+                                <td><?= $this->escapeHtml((string)$item->getPlateNumber()) ?></td>
+                                <td><?= $this->escapeHtml($item->getTypeLabel()) ?></td>
+                                <td><?= $item->getCapacityKg() ? number_format((int)$item->getCapacityKg(), 0, ',', '.') . ' kg' : '-' ?></td>
+                                <td><span class="badge"><?= $this->escapeHtml($item->getStatusLabel()) ?></span></td>
+                                <td>
+                                    <a href="<?= $this->url('vehicles', ['action' => 'detail', 'id' => (int)$item->getId()]) ?>">Chi tiết</a>
+                                    <?php if ($canEdit): ?> <a href="<?= $this->url('vehicles', ['action' => 'edit', 'id' => (int)$item->getId()]) ?>">Sửa</a><?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?><a class="button" href="<?= $this->url('vehicles') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a><?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?><a class="button" href="<?= $this->url('vehicles') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a><?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

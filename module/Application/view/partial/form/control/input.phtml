@@ -1,0 +1,21 @@
+<?php
+/**
+ * Ô nhập một dòng. Gọi qua partial/form/row, không gọi trực tiếp từ view module.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var string $name
+ * @var mixed  $value
+ * @var string $type
+ * @var bool   $required
+ * @var bool   $hasError
+ * @var string $errorId
+ * @var array<string, string> $attrs
+ */
+?>
+<input type="<?= $this->escapeHtmlAttr($type) ?>"
+       id="<?= $this->escapeHtmlAttr($name) ?>"
+       name="<?= $this->escapeHtmlAttr($name) ?>"
+       value="<?= $this->escapeHtmlAttr((string)$value) ?>"
+       <?= $required ? 'required' : '' ?>
+       <?= $hasError ? 'aria-invalid="true" aria-describedby="' . $this->escapeHtmlAttr($errorId) . '"' : '' ?>
+       <?= $this->partial('partial/form/control/attrs', ['attrs' => $attrs]) ?>>

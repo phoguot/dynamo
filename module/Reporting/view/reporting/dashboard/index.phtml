@@ -1,0 +1,113 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var array{fleet:?Reporting\Model\FleetUtilizationDaily\FleetUtilizationDailyModel, revenue:?Reporting\Model\RevenueMonthly\RevenueMonthlyModel, receivables:array<string,mixed>, computedAt:?string} $summary
+ */
+
+$this->headTitle('Dashboard');
+$fleet = $summary['fleet'];
+$revenue = $summary['revenue'];
+$receivables = $summary['receivables'];
+$computedAt = $summary['computedAt'] ? (string)$summary['computedAt'] : null;
+$computedAtDisplay = \Application\Model\DateModel::displayDateTime($computedAt, '');
+?>
+<header class="pageHead dashboardHero">
+    <div>
+        <p class="sectionLabel">Tổng quan vận hành</p>
+        <h1>Dashboard ca hôm nay</h1>
+        <p><?= $computedAtDisplay !== '' ? 'Snapshot lúc ' . $this->escapeHtml($computedAtDisplay) : 'Chưa có snapshot tổng hợp. Các bảng bên dưới vẫn giữ khung điều hành để kiểm tra nhanh dữ liệu.' ?></p>
+    </div>
+    <div class="dashboardStatus">
+        <span class="badge<?= $computedAt ? ' run' : '' ?>"><?= $computedAt ? 'Đã cập nhật' : 'Chờ dữ liệu' ?></span>
+        <strong><?= $fleet ? number_format($fleet->getUtilizationRate(), 2, ',', '.') . '%' : '0,00%' ?></strong>
+        <span>Tỷ lệ khai thác đội máy</span>
+    </div>
+</header>
+
+<section class="cards" aria-label="Chỉ số điều hành">
+    <article class="card"><small>Tổng máy</small><strong><?= $fleet ? number_format($fleet->getTotalGenerators(), 0, ',', '.') : '0' ?></strong><span>Toàn đội máy</span></article>
+    <article class="card"><small>Đang thuê</small><strong><?= $fleet ? number_format($fleet->getRentedCount(), 0, ',', '.') : '0' ?></strong><span>Đang tạo doanh thu</span></article>
+    <article class="card"><small>Sẵn sàng</small><strong><?= $fleet ? number_format($fleet->getAvailableCount(), 0, ',', '.') : '0' ?></strong><span>Có thể điều phối</span></article>
+    <article class="card"><small>Doanh thu tháng</small><strong><?= $revenue ? number_format($revenue->getInvoicedAmount(), 0, ',', '.') : '0' ?></strong><span>VND đã xuất hóa đơn</span></article>
+    <article class="card"><small>Công nợ</small><strong><?= number_format((int)($receivables['totalDebt'] ?? 0), 0, ',', '.') ?></strong><span>VND còn phải thu</span></article>
+    <article class="card"><small>DSO</small><strong><?= number_format((float)($receivables['dsoDays'] ?? 0), 2, ',', '.') ?></strong><span>Ngày thu tiền bình quân</span></article>
+</section>
+
+<section class="grid dashboardPanelGrid">
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead">
+                <strong>Tình trạng đội máy</strong>
+                <span class="badge run">Fleet</span>
+            </div>
+            <?php if ($fleet === null): ?>
+                <div class="emptySignal">
+                    <p>Chưa có dữ liệu khai thác đội máy. Khi reporting snapshot chạy, bảng này sẽ hiển thị kho, trạng thái và năng lực điều phối.</p>
+                </div>
+            <?php else: ?>
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="col">Ngày</th>
+                        <th scope="col">Kho</th>
+                        <th scope="col">Sẵn sàng</th>
+                        <th scope="col">Giữ chỗ</th>
+                        <th scope="col">Vận chuyển</th>
+                        <th scope="col">Đang thuê</th>
+                        <th scope="col">Bảo trì</th>
+                        <th scope="col">Sửa chữa</th>
+                        <th scope="col">Ngừng</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($fleet->getReportDate())) ?></td>
+                        <td><?= $fleet->getWarehouseCode() ? $this->escapeHtml((string)$fleet->getWarehouseCode()) : 'Toàn công ty' ?></td>
+                        <td><?= (int)$fleet->getAvailableCount() ?></td>
+                        <td><?= (int)$fleet->getHeldCount() ?></td>
+                        <td><?= (int)$fleet->getTransitCount() ?></td>
+                        <td><?= (int)$fleet->getRentedCount() ?></td>
+                        <td><?= (int)$fleet->getMaintenanceCount() ?></td>
+                        <td><?= (int)$fleet->getRepairCount() ?></td>
+                        <td><?= (int)$fleet->getRetiredCount() ?></td>
+                    </tr>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </article>
+    </div>
+
+    <div class="stack">
+        <article class="panel">
+            <div class="panelHead">
+                <strong>Công nợ theo tuổi nợ</strong>
+                <span class="badge risk">AR</span>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th scope="col">Nhóm</th>
+                    <th scope="col">Giá trị</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr><td>Ngày snapshot</td><td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate((string)($receivables['snapshotDate'] ?? ''))) ?></td></tr>
+                <tr><td>0-30 ngày</td><td><?= number_format((int)($receivables['bucket0To30'] ?? 0), 0, ',', '.') ?></td></tr>
+                <tr><td>31-60 ngày</td><td><?= number_format((int)($receivables['bucket31To60'] ?? 0), 0, ',', '.') ?></td></tr>
+                <tr><td>61-90 ngày</td><td><?= number_format((int)($receivables['bucket61To90'] ?? 0), 0, ',', '.') ?></td></tr>
+                <tr><td>Trên 90 ngày</td><td><?= number_format((int)($receivables['bucketOver90'] ?? 0), 0, ',', '.') ?></td></tr>
+                <tr><td>Tổng công nợ</td><td><strong><?= number_format((int)($receivables['totalDebt'] ?? 0), 0, ',', '.') ?></strong></td></tr>
+                </tbody>
+            </table>
+        </article>
+
+        <article class="panel">
+            <div class="panelHead"><strong>Lối tắt</strong><span class="badge">Ops</span></div>
+            <div class="specGrid">
+                <div class="spec"><small>Đội máy</small><strong><a href="<?= $this->url('generators') ?>">Mở</a></strong></div>
+                <div class="spec"><small>Điều phối</small><strong><a href="<?= $this->url('dispatch-jobs') ?>">Mở</a></strong></div>
+                <div class="spec"><small>Báo cáo</small><strong><a href="<?= $this->url('reports') ?>">Mở</a></strong></div>
+            </div>
+        </article>
+    </div>
+</section>

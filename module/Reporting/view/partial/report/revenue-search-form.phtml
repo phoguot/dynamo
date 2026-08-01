@@ -1,0 +1,11 @@
+<?php
+/** @var Reporting\Form\Report\RevenueSearchForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'method' => 'get', 'class' => 'form-report-revenue']) ?>
+    <?= $row(['name' => 'periodYear', 'label' => 'Năm', 'type' => 'number', 'attrs' => ['min' => 2000, 'max' => 2100]]) ?>
+    <?= $row(['name' => 'periodMonth', 'label' => 'Tháng', 'type' => 'number', 'attrs' => ['min' => 1, 'max' => 12]]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => 'Lọc doanh thu', 'cancelUrl' => $this->url('reports'), 'cancelLabel' => 'Xóa lọc']) ?>
+<?= $this->partial('partial/form/close') ?>

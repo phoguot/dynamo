@@ -1,0 +1,102 @@
+<?php
+/**
+ * Nhật ký kiểm toán toàn hệ thống — chỉ đọc.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Application\Paginator\Paginator|null $paginator
+ * @var User\Form\AuditLog\AuditLogSearchForm $searchForm
+ * @var array<int, string> $actorNames  id người dùng => họ tên
+ * @var array<string, string> $errors
+ */
+
+use Application\Model\DateModel;
+
+$this->headTitle('Nhật ký kiểm toán');
+$filters = $searchForm->getSubmittedData();
+?>
+<header class="pageHead">
+    <div>
+        <h1>Nhật ký kiểm toán</h1>
+        <p>Ai làm gì, lúc nào, trên đối tượng nào. Bản ghi chỉ thêm, không sửa không xóa.</p>
+    </div>
+    <div class="actions">
+        <a class="button" href="<?= $this->url('users') ?>">Về danh sách người dùng</a>
+    </div>
+</header>
+
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+    <p role="alert"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="grid listGrid">
+    <div class="stack">
+        <article class="panel filterPanel">
+            <div class="panelHead"><strong>Bộ lọc nhật ký</strong><span class="badge">Filter</span></div>
+            <?= $this->partial('partial/audit-log/search-form', [
+                'form'   => $searchForm,
+                'errors' => $errors,
+            ]) ?>
+        </article>
+
+        <article class="panel listPanel">
+            <div class="panelHead">
+                <strong>Dòng nhật ký</strong>
+                <?php if ($paginator !== null): ?><span class="badge"><?= (int)$paginator->getTotalItemCount() ?> dòng</span><?php endif; ?>
+            </div>
+
+            <?php if ($paginator === null || count($paginator) === 0): ?>
+                <p>Chưa có dòng nhật ký nào khớp điều kiện lọc.</p>
+            <?php else: ?>
+                <div class="tableScroll" tabindex="0">
+                    <table class="dataTable">
+                        <caption>Tổng cộng <?= (int)$paginator->getTotalItemCount() ?> dòng nhật ký</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col">Thời điểm</th>
+                            <th scope="col">Người thực hiện</th>
+                            <th scope="col">Hành động</th>
+                            <th scope="col">Đối tượng</th>
+                            <th scope="col">IP</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($paginator as $item): /** @var User\Model\AuditLog\AuditLogModel $item */ ?>
+                            <?php $actorId = $item->getUserId(); ?>
+                            <tr>
+                                <td><?= $this->escapeHtml(DateModel::displayDateTime($item->getCreatedAt(), '-')) ?></td>
+                                <td>
+                                    <?php if ($actorId === null): ?>
+                                        <span class="badge">Hệ thống / ẩn danh</span>
+                                    <?php else: ?>
+                                        <?= $this->escapeHtml($actorNames[(int)$actorId] ?? ('#' . (int)$actorId)) ?>
+                                        <small>#<?= (int)$actorId ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="badge"><?= $this->escapeHtml($item->getActionLabel()) ?></span></td>
+                                <td>
+                                    <?= $this->escapeHtml((string)$item->getObjectType()) ?>
+                                    <?php if ($item->getObjectId() !== null): ?>
+                                        <small>#<?= (int)$item->getObjectId() ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $this->escapeHtml((string)$item->getIp()) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <?php $currentPage = (int)$paginator->getCurrentPageNumber(); $totalPages = (int)count($paginator); ?>
+                <nav class="actions" aria-label="Phân trang">
+                    <span class="badge">Trang <?= $currentPage ?> / <?= $totalPages ?></span>
+                    <?php if ($currentPage > 1): ?>
+                        <a class="button" href="<?= $this->url('audit-logs') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage - 1]))) ?>">Trang trước</a>
+                    <?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?>
+                        <a class="button" href="<?= $this->url('audit-logs') ?>?<?= $this->escapeHtmlAttr(http_build_query(array_merge($filters, ['page' => $currentPage + 1]))) ?>">Trang sau</a>
+                    <?php endif; ?>
+                </nav>
+            <?php endif; ?>
+        </article>
+    </div>
+</section>

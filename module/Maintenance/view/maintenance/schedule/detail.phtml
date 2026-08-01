@@ -1,0 +1,22 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Maintenance\Model\Schedule\ScheduleModel $schedule
+ * @var bool $canEdit
+ */
+$this->headTitle('Lịch bảo trì #' . (string)$schedule->getId());
+?>
+<h1>Lịch bảo trì #<?= (int)$schedule->getId() ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('maintenance-schedules') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('maintenance-schedules', ['action' => 'edit', 'id' => (int)$schedule->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Máy</dt><dd>#<?= (int)$schedule->getGeneratorId() ?></dd>
+    <dt>Loại lịch</dt><dd><?= $this->escapeHtml($schedule->getTypeLabel()) ?></dd>
+    <dt>Chu kỳ giờ máy</dt><dd><?= $schedule->getIntervalHours() !== null ? $this->escapeHtml((string)$schedule->getIntervalHours()) : '-' ?></dd>
+    <dt>Chu kỳ ngày</dt><dd><?= $schedule->getIntervalDays() !== null ? (int)$schedule->getIntervalDays() : '-' ?></dd>
+    <dt>Giờ bảo trì gần nhất</dt><dd><?= $schedule->getLastServiceHour() !== null ? $this->escapeHtml((string)$schedule->getLastServiceHour()) : '-' ?></dd>
+    <dt>Ngày bảo trì gần nhất</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($schedule->getLastServiceDate())) ?></dd>
+    <dt>Giờ tới hạn</dt><dd><?= $schedule->getNextDueHour() !== null ? $this->escapeHtml((string)$schedule->getNextDueHour()) : '-' ?></dd>
+    <dt>Ngày tới hạn</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($schedule->getNextDueDate())) ?></dd>
+    <dt>Đang dùng</dt><dd><?= $schedule->isActive() ? 'Có' : 'Không' ?></dd>
+</dl>

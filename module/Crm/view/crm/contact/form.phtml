@@ -1,0 +1,20 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Contact\ContactSaveForm $saveForm
+ * @var Crm\Model\Customer\CustomerModel $customer
+ * @var Crm\Model\Contact\ContactModel|null $contact
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $contact !== null;
+$this->headTitle($isEdit ? 'Sửa liên hệ' : 'Thêm liên hệ');
+?>
+<h1><?= $isEdit ? 'Sửa liên hệ' : 'Thêm liên hệ' ?> — <?= $this->escapeHtml((string)$customer->getName()) ?></h1>
+
+<?= $this->partial('partial/contact/save-form', [
+    'form'     => $saveForm,
+    'customer' => $customer,
+    'contact'  => $contact,
+    'errors'   => $errors,
+]) ?>

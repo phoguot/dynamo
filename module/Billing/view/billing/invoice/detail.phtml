@@ -1,0 +1,48 @@
+<?php
+$this->headTitle('Hóa đơn ' . (string)$invoice->getInvoiceNo());
+?>
+<h1>Hóa đơn <?= $this->escapeHtml((string)$invoice->getInvoiceNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('invoices') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('invoices', ['action' => 'edit', 'id' => (int)$invoice->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Khách hàng</dt><dd>#<?= (int)$invoice->getCustomerId() ?></dd>
+    <dt>Hợp đồng</dt><dd><?= $invoice->getContractId() ? '#' . (int)$invoice->getContractId() : '-' ?></dd>
+    <dt>Đơn thuê</dt><dd><?= $invoice->getRentalOrderId() ? '#' . (int)$invoice->getRentalOrderId() : '-' ?></dd>
+    <dt>Kỳ hóa đơn</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($invoice->getPeriodFrom())) ?> - <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($invoice->getPeriodTo())) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($invoice->getStatusLabel()) ?></dd>
+    <dt>Tiền thuê</dt><dd><?= number_format($invoice->getRentAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Phụ phí</dt><dd><?= number_format($invoice->getSurchargeAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Giảm giá</dt><dd><?= number_format($invoice->getDiscountAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>VAT</dt><dd><?= (int)$invoice->getVatRate() ?>% / <?= number_format($invoice->getVatAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Tổng phải thu</dt><dd><?= number_format($invoice->getTotalAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Đã thu</dt><dd><?= number_format($invoice->getPaidAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Còn lại</dt><dd><?= number_format($invoice->getRemainAmount(), 0, ',', '.') ?> đ</dd>
+    <dt>Lý do hủy</dt><dd><?= $invoice->getVoidReason() ? $this->escapeHtml((string)$invoice->getVoidReason()) : '-' ?></dd>
+</dl>
+<?php if ($canChangeStatus && $nextStatuses !== []): ?>
+    <h2>Đổi trạng thái</h2>
+    <?= $this->partial('partial/invoice/status-form', ['form' => $statusForm, 'nextStatuses' => $nextStatuses, 'action' => $this->url('invoices', ['action' => 'changestatus', 'id' => (int)$invoice->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<h2>Dòng hóa đơn</h2>
+<?php if ($canAddLine): ?>
+    <?= $this->partial('partial/invoice-line/save-form', ['form' => $lineForm, 'action' => $this->url('invoices', ['action' => 'addline', 'id' => (int)$invoice->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<?php if ($lines === []): ?>
+    <p>Chưa có dòng nào trong hóa đơn này.</p>
+<?php else: ?>
+    <table>
+        <thead><tr><th>Loại</th><th>Diễn giải</th><th>Máy</th><th>Số lượng</th><th>Đơn vị</th><th>Đơn giá</th><th>Thành tiền</th><th>VAT</th><th>Thao tác</th></tr></thead>
+        <tbody><?php foreach ($lines as $line): ?><tr>
+            <td><?= $this->escapeHtml($line->getTypeLabel()) ?></td>
+            <td><?= $this->escapeHtml((string)$line->getDescription()) ?></td>
+            <td><?= $line->getGeneratorId() ? '#' . (int)$line->getGeneratorId() : '-' ?></td>
+            <td><?= $this->escapeHtml((string)$line->getQuantity()) ?></td>
+            <td><?= $this->escapeHtml($line->getUnitLabel()) ?></td>
+            <td><?= number_format($line->getUnitPrice(), 0, ',', '.') ?> đ</td>
+            <td><?= number_format($line->getLineAmount(), 0, ',', '.') ?> đ</td>
+            <td><?= $line->isVatable() ? 'Có' : 'Không' ?></td>
+            <td><?php if ($canDeleteLine): ?><form method="post" action="<?= $this->url('invoices', ['action' => 'deleteline', 'id' => (int)$invoice->getId()]) ?>"><input type="hidden" name="lineId" value="<?= (int)$line->getId() ?>"><?= $this->partial('partial/form/csrf', ['form' => $lineForm]) ?><button type="submit">Xóa</button></form><?php else: ?>-<?php endif; ?></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+<?php endif; ?>

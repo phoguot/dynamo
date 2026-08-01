@@ -1,0 +1,16 @@
+<?php
+/** @var Sales\Form\PriceList\PriceListSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['code', 'name', 'validFrom', 'validTo', 'isActive', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-price-list']) ?>
+    <?= $row(['name' => 'code', 'label' => 'Mã bảng giá', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'name', 'label' => 'Tên bảng giá', 'required' => true, 'attrs' => ['maxlength' => 200]]) ?>
+    <?= $row(['name' => 'validFrom', 'label' => 'Hiệu lực từ', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'validTo', 'label' => 'Hiệu lực đến', 'type' => 'date']) ?>
+    <?= $row(['name' => 'isActive', 'label' => 'Trạng thái', 'control' => 'select', 'choices' => ['1' => 'Đang dùng', '0' => 'Ngưng dùng']]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'attrs' => ['maxlength' => 255]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $priceList ? 'Lưu thay đổi' : 'Thêm bảng giá', 'cancelUrl' => $this->url('price-lists')]) ?>
+<?= $this->partial('partial/form/close') ?>
+

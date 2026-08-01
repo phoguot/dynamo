@@ -1,0 +1,5 @@
+<?php
+$this->headTitle($invoice ? 'Sửa hóa đơn' : 'Thêm hóa đơn');
+?>
+<h1><?= $invoice ? 'Sửa hóa đơn' : 'Thêm hóa đơn' ?></h1>
+<?= $this->partial('partial/invoice/save-form', ['form' => $saveForm, 'invoice' => $invoice, 'errors' => $errors]) ?>

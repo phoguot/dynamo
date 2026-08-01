@@ -1,0 +1,4 @@
+<?php $this->headTitle($contract ? 'Sửa hợp đồng' : 'Thêm hợp đồng'); ?>
+<h1><?= $contract ? 'Sửa hợp đồng' : 'Thêm hợp đồng' ?></h1>
+<?= $this->partial('partial/contract/save-form', ['form' => $saveForm, 'contract' => $contract, 'errors' => $errors]) ?>
+

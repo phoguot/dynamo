@@ -1,0 +1,74 @@
+<?php
+/**
+ * Trang đăng nhập.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\Auth\LoginForm $loginForm
+ * @var array<string, string> $errors
+ */
+
+$this->headTitle('Đăng nhập');
+$loginForm = $loginForm ?? ($form ?? null);
+$errors = $errors ?? [];
+?>
+<main class="authScreen authScreen--ops">
+    <section class="authIntro authIntro--ops" aria-labelledby="login-title">
+        <div class="mark authMark">
+            <span aria-hidden="true">DG</span>
+            <div>
+                <strong>Dynamo Rental</strong>
+                <small>Depot control</small>
+            </div>
+        </div>
+
+        <div class="authHero">
+            <p class="sectionLabel">Ca vận hành</p>
+            <h1 id="login-title">Đăng nhập bảng điều hành</h1>
+            <p>Truy cập đội máy, đơn thuê, điều phối, bảo trì và tài chính trong cùng một không gian làm việc.</p>
+        </div>
+
+        <div class="authBoard" aria-label="Phạm vi vận hành">
+            <article>
+                <small>M02</small>
+                <strong>Đội máy</strong>
+                <span>Trạng thái, giờ máy, vị trí</span>
+            </article>
+            <article>
+                <small>M05-M06</small>
+                <strong>Thuê & điều phối</strong>
+                <span>Giao, thu hồi, đổi máy</span>
+            </article>
+            <article>
+                <small>M07</small>
+                <strong>Bảo trì</strong>
+                <span>Lịch, phiếu, phụ tùng</span>
+            </article>
+            <article>
+                <small>M08-M09</small>
+                <strong>Tài chính</strong>
+                <span>Hóa đơn, công nợ, báo cáo</span>
+            </article>
+        </div>
+    </section>
+
+    <section class="loginBox loginBox--ops" aria-label="Form đăng nhập">
+        <div>
+            <p class="sectionLabel">Tài khoản</p>
+            <h2>Vào hệ thống</h2>
+            <p>Nhập thông tin được cấp cho ca làm việc của bạn.</p>
+        </div>
+
+        <?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?>
+            <p role="alert"><?= $this->escapeHtml($message) ?></p>
+        <?php endforeach; ?>
+
+        <?php if ($loginForm === null): ?>
+            <p role="alert">Form đăng nhập chưa được khởi tạo. Vui lòng tải lại trang.</p>
+        <?php else: ?>
+            <?= $this->partial('partial/auth/login-form', [
+                'form'   => $loginForm,
+                'errors' => $errors,
+            ]) ?>
+        <?php endif; ?>
+    </section>
+</main>

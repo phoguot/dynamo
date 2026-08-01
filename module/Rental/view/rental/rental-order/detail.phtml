@@ -1,0 +1,55 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Rental\Model\RentalOrder\RentalOrderModel $order
+ * @var Rental\Model\GeneratorOccupancy\GeneratorOccupancyModel[] $occupancy
+ * @var array<string, string> $nextStatuses
+ * @var Rental\Form\RentalOrder\RentalOrderStatusForm $statusForm
+ * @var Rental\Form\RentalOrder\RentalOrderExtendForm $extendForm
+ * @var bool $canEdit
+ * @var bool $canExtend
+ * @var array<string, string> $errors
+ */
+$this->headTitle('Đơn thuê ' . (string)$order->getOrderNo());
+?>
+<h1>Đơn thuê <?= $this->escapeHtml((string)$order->getOrderNo()) ?></h1>
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?><p role="status"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<?php foreach ($this->flashMessenger()->getErrorMessages() as $message): ?><p role="alert"><?= $this->escapeHtml($message) ?></p><?php endforeach; ?>
+<p><a href="<?= $this->url('rental-orders') ?>">Quay lại danh sách</a><?php if ($canEdit): ?> · <a href="<?= $this->url('rental-orders', ['action' => 'edit', 'id' => (int)$order->getId()]) ?>">Sửa</a><?php endif; ?></p>
+<dl>
+    <dt>Khách hàng</dt><dd>#<?= (int)$order->getCustomerId() ?></dd>
+    <dt>Công trình</dt><dd><?= $order->getSiteId() ? '#' . (int)$order->getSiteId() : '-' ?></dd>
+    <dt>Hợp đồng</dt><dd><?= $order->getContractId() ? '#' . (int)$order->getContractId() : '-' ?></dd>
+    <dt>Máy</dt><dd>#<?= (int)$order->getGeneratorId() ?></dd>
+    <dt>Thời gian thuê</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($order->getStartDate())) ?> → <?= $this->escapeHtml(\Application\Model\DateModel::displayDate($order->getExpectedEndDate())) ?></dd>
+    <dt>Ngày thu hồi thực tế</dt><dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($order->getActualEndDate())) ?></dd>
+    <dt>Trạng thái</dt><dd><?= $this->escapeHtml($order->getStatusLabel()) ?></dd>
+    <dt>Đơn giá</dt><dd><?= number_format((int)$order->getUnitPrice(), 0, ',', '.') ?> VND</dd>
+    <dt>Bậc thời hạn</dt><dd><?= $this->escapeHtml((string)$order->getDurationTier()) ?></dd>
+    <dt>Kèm người vận hành</dt><dd><?= $order->getWithOperator() ? 'Có' : 'Không' ?></dd>
+    <dt>Số lần gia hạn</dt><dd><?= (int)$order->getExtendedTimes() ?></dd>
+    <dt>Chỉ số giờ máy đầu</dt><dd><?= $order->getStartHourMeter() !== null ? number_format((float)$order->getStartHourMeter(), 1, ',', '.') : '-' ?></dd>
+    <dt>Chỉ số giờ máy cuối</dt><dd><?= $order->getEndHourMeter() !== null ? number_format((float)$order->getEndHourMeter(), 1, ',', '.') : '-' ?></dd>
+    <dt>Ghi chú</dt><dd><?= $order->getNote() ? $this->escapeHtml((string)$order->getNote()) : '-' ?></dd>
+</dl>
+<?php if ($canEdit && $nextStatuses !== []): ?>
+    <h2>Đổi trạng thái</h2>
+    <?= $this->partial('partial/rental-order/status-form', ['form' => $statusForm, 'nextStatuses' => $nextStatuses, 'action' => $this->url('rental-orders', ['action' => 'changestatus', 'id' => (int)$order->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<?php if ($canEdit && $canExtend): ?>
+    <h2>Gia hạn</h2>
+    <?= $this->partial('partial/rental-order/extend-form', ['form' => $extendForm, 'action' => $this->url('rental-orders', ['action' => 'extend', 'id' => (int)$order->getId()]), 'errors' => $errors]) ?>
+<?php endif; ?>
+<h2>Lịch chiếm dụng</h2>
+<?php if ($occupancy === []): ?>
+    <p>Đơn thuê này chưa có dòng chiếm dụng nào.</p>
+<?php else: ?>
+    <table>
+        <thead><tr><th>Ngày</th><th>Loại giữ</th><th>Nguồn</th></tr></thead>
+        <tbody><?php foreach ($occupancy as $hold): ?><tr>
+            <td><?= $this->escapeHtml(\Application\Model\DateModel::displayDate($hold->getOccupiedDate())) ?></td>
+            <td><?= $this->escapeHtml((string)$hold->getHoldType()) ?></td>
+            <td><?= $this->escapeHtml((string)$hold->getSourceType()) ?> #<?= (int)$hold->getSourceId() ?></td>
+        </tr><?php endforeach; ?></tbody>
+    </table>
+<?php endif; ?>

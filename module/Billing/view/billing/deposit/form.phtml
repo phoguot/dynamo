@@ -1,0 +1,3 @@
+<?php $this->headTitle($deposit ? 'Sửa phiếu cọc' : 'Thêm phiếu cọc'); ?>
+<h1><?= $deposit ? 'Sửa phiếu cọc' : 'Thêm phiếu cọc' ?></h1>
+<?= $this->partial('partial/deposit/save-form', ['form' => $saveForm, 'deposit' => $deposit, 'errors' => $errors]) ?>

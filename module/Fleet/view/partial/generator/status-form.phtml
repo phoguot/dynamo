@@ -1,0 +1,55 @@
+<?php
+/**
+ * MARKUP form đổi trạng thái máy, đặt trên trang chi tiết.
+ *
+ * Danh sách trạng thái đích do GeneratorService::nextStatuses() tính theo state machine —
+ * view KHÔNG tự đọc bảng chuyển tiếp và không tự lọc.
+ *
+ * Form này có CSRF token RIÊNG, khác token của form lưu máy.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Fleet\Form\Generator\GeneratorStatusForm $form
+ * @var Fleet\Model\Generator\GeneratorModel $generator
+ * @var array<string, string> $nextStatuses
+ * @var array<string, string> $errors
+ */
+
+if ($nextStatuses === []) {
+    echo '<p class="empty-hint">Máy đang ở trạng thái cuối, không chuyển tiếp được nữa.</p>';
+    return;
+}
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => [], 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'action' => $this->url('generators', ['action' => 'changestatus', 'id' => $generator->getId()]),
+    'class'  => 'form-change-status',
+]) ?>
+
+    <?= $row([
+        'name'        => 'status',
+        'label'       => 'Chuyển sang trạng thái',
+        'control'     => 'select',
+        'required'    => true,
+        'choices'     => $nextStatuses,
+        'emptyChoice' => '— Chọn trạng thái —',
+    ]) ?>
+
+    <?= $row([
+        'name'    => 'reason',
+        'label'   => 'Lý do',
+        'control' => 'textarea',
+        'hint'    => 'Ghi rõ lý do để người sau tra lại được trong nhật ký.',
+        'attrs'   => ['maxlength' => 255, 'rows' => 2],
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Đổi trạng thái',
+        'confirm'     => 'Đổi trạng thái máy sẽ được ghi vào nhật ký. Tiếp tục?',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

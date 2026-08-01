@@ -1,0 +1,63 @@
+<?php
+/**
+ * Hồ sơ cá nhân của người đang đăng nhập.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Model\User\UserModel $user
+ * @var User\Form\Auth\LogoutForm $logoutForm
+ */
+
+$this->headTitle('Hồ sơ cá nhân');
+$displayName = (string)$user->getFullName();
+$username = (string)$user->getUsername();
+$initials = strtoupper(substr($displayName !== '' ? $displayName : $username, 0, 2));
+?>
+
+<section class="pageHead profileHero">
+    <div class="profileIdentity">
+        <span class="profileAvatar" aria-hidden="true"><?= $this->escapeHtml($initials) ?></span>
+        <div>
+            <p class="sectionLabel">Hồ sơ cá nhân</p>
+            <h1><?= $this->escapeHtml($displayName !== '' ? $displayName : $username) ?></h1>
+            <p><?= $this->escapeHtml($username) ?> · <?= $this->escapeHtml($user->getRoleLabel()) ?></p>
+        </div>
+    </div>
+
+    <?= $this->partial('partial/form/open', [
+        'form'   => $logoutForm,
+        'action' => $this->url('logout'),
+        'class'  => 'logoutForm',
+    ]) ?>
+        <button class="danger" type="submit">Đăng xuất</button>
+    <?= $this->partial('partial/form/close') ?>
+</section>
+
+<?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
+    <p class="notice" role="status"><?= $this->escapeHtml($message) ?></p>
+<?php endforeach; ?>
+
+<section class="dashboardPanelGrid">
+    <article class="panel">
+        <div class="sectionLabel">Thông tin liên hệ</div>
+        <dl class="profileList">
+            <dt>Email</dt>
+            <dd><?= $this->escapeHtml((string)$user->getEmail() ?: 'Chưa cập nhật') ?></dd>
+            <dt>Số điện thoại</dt>
+            <dd><?= $this->escapeHtml((string)$user->getPhone() ?: 'Chưa cập nhật') ?></dd>
+            <dt>Ghi chú</dt>
+            <dd><?= $this->escapeHtml((string)$user->getNote() ?: 'Không có') ?></dd>
+        </dl>
+    </article>
+
+    <article class="panel">
+        <div class="sectionLabel">Phiên và quyền</div>
+        <dl class="profileList">
+            <dt>Vai trò</dt>
+            <dd><?= $this->escapeHtml($user->getRoleLabel()) ?></dd>
+            <dt>Trạng thái</dt>
+            <dd><?= $this->escapeHtml($user->getStatusLabel()) ?></dd>
+            <dt>Đăng nhập gần nhất</dt>
+            <dd><?= $this->escapeHtml(\Application\Model\DateModel::displayDateTime($user->getLastLoginAt(), 'Chưa từng đăng nhập')) ?></dd>
+        </dl>
+    </article>
+</section>

@@ -1,0 +1,56 @@
+<?php
+/**
+ * MARKUP form khóa / mở khóa tài khoản, đặt trên trang chi tiết.
+ *
+ * Danh sách trạng thái đích do UserService::nextStatuses() tính theo state machine — view
+ * KHÔNG tự đọc bảng chuyển tiếp và không tự lọc.
+ *
+ * Form này có CSRF token RIÊNG, khác token của form lưu hồ sơ và form mật khẩu.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserStatusForm $form
+ * @var User\Model\User\UserModel $user
+ * @var array<string, string> $nextStatuses
+ * @var array<string, string> $errors
+ */
+
+if ($nextStatuses === []) {
+    echo '<p class="empty-hint">Tài khoản đã ngừng sử dụng, không chuyển trạng thái được nữa.</p>';
+    return;
+}
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => [], 'errors' => $errors]
+);
+?>
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'action' => $this->url('users', ['action' => 'changestatus', 'id' => $user->getId()]),
+    'class'  => 'form-change-status',
+]) ?>
+
+    <?= $row([
+        'name'        => 'status',
+        'label'       => 'Chuyển sang trạng thái',
+        'control'     => 'select',
+        'required'    => true,
+        'choices'     => $nextStatuses,
+        'emptyChoice' => '— Chọn trạng thái —',
+    ]) ?>
+
+    <?= $row([
+        'name'     => 'reason',
+        'label'    => 'Lý do',
+        'control'  => 'textarea',
+        'required' => true,
+        'hint'     => 'Khóa tài khoản một người là việc phải giải thích được về sau — ghi rõ lý do.',
+        'attrs'    => ['maxlength' => 255, 'rows' => 2],
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Đổi trạng thái',
+        'confirm'     => 'Người dùng sẽ mất quyền truy cập ngay lập tức. Tiếp tục?',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

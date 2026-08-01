@@ -1,0 +1,33 @@
+<?php
+/**
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var Crm\Form\Contact\ContactSaveForm $form
+ * @var Crm\Model\Customer\CustomerModel $customer
+ * @var Crm\Model\Contact\ContactModel|null $contact
+ * @var array<string, string> $errors
+ */
+
+$isEdit = $contact !== null;
+$values = $form->getSubmittedData();
+$customerId = (int)($values['customerId'] ?? $customer->getId());
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => $values, 'errors' => $errors]
+);
+$fieldsWithOwnError = ['siteId', 'fullName', 'position', 'phone', 'email', 'isPrimary', 'note'];
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => $fieldsWithOwnError]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-contact']) ?>
+    <input type="hidden" name="customerId" value="<?= $customerId ?>">
+    <?= $row(['name' => 'siteId', 'label' => 'Id công trình', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'fullName', 'label' => 'Họ tên', 'required' => true, 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'position', 'label' => 'Chức vụ', 'attrs' => ['maxlength' => 120]]) ?>
+    <?= $row(['name' => 'phone', 'label' => 'Điện thoại', 'attrs' => ['maxlength' => 20]]) ?>
+    <?= $row(['name' => 'email', 'label' => 'Email', 'type' => 'email', 'attrs' => ['maxlength' => 190]]) ?>
+    <?= $row(['name' => 'isPrimary', 'label' => 'Liên hệ chính', 'control' => 'select', 'choices' => [0 => 'Không', 1 => 'Có']]) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['maxlength' => 255, 'rows' => 3]]) ?>
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => $isEdit ? 'Lưu thay đổi' : 'Thêm liên hệ',
+        'cancelUrl'   => $this->url('customers', ['action' => 'detail', 'id' => $customerId]),
+    ]) ?>
+<?= $this->partial('partial/form/close') ?>

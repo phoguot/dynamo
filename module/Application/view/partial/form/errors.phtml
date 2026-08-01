@@ -1,0 +1,27 @@
+<?php
+/**
+ * Tổng hợp lỗi đặt ở đầu form.
+ *
+ * Chỉ liệt kê lỗi KHÔNG gắn được vào field nào (CSRF hết hạn, lỗi liên trường, lỗi nghiệp vụ
+ * từ Service). Lỗi của từng field đã hiện sát ô nhập qua partial/form/row — nhắc lại ở đây
+ * là thừa và làm người dùng phải đọc hai lần.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var array<string, string> $errors    toàn bộ lỗi
+ * @var array<int, string>|null $fields  danh sách field đã hiển thị lỗi riêng
+ */
+
+$fields = $fields ?? [];
+$general = array_diff_key($errors, array_flip($fields));
+if ($general === []) {
+    return;
+}
+?>
+<div class="form-errors" role="alert">
+    <p>Không lưu được, vui lòng kiểm tra lại:</p>
+    <ul>
+        <?php foreach ($general as $message): ?>
+            <li><?= $this->escapeHtml($message) ?></li>
+        <?php endforeach; ?>
+    </ul>
+</div>

@@ -1,0 +1,20 @@
+<?php
+/** @var Billing\Form\Deposit\DepositSaveForm $form */
+$values = $form->getSubmittedData();
+$row = fn (array $config): string => $this->partial('partial/form/row', $config + ['values' => $values, 'errors' => $errors]);
+?>
+<?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => ['depositNo', 'customerId', 'contractId', 'rentalOrderId', 'amount', 'receivedDate', 'deductedAmount', 'deductReason', 'refundedAmount', 'refundedDate', 'note']]) ?>
+<?= $this->partial('partial/form/open', ['form' => $form, 'class' => 'form-deposit']) ?>
+    <?= $row(['name' => 'depositNo', 'label' => 'Số phiếu cọc', 'required' => true, 'attrs' => ['maxlength' => 30, 'autocomplete' => 'off']]) ?>
+    <?= $row(['name' => 'customerId', 'label' => 'ID khách hàng', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'contractId', 'label' => 'ID hợp đồng', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'rentalOrderId', 'label' => 'ID đơn thuê', 'type' => 'number', 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'amount', 'label' => 'Số tiền cọc', 'type' => 'number', 'required' => true, 'attrs' => ['min' => 1]]) ?>
+    <?= $row(['name' => 'receivedDate', 'label' => 'Ngày nhận cọc', 'type' => 'date', 'required' => true]) ?>
+    <?= $row(['name' => 'deductedAmount', 'label' => 'Đã bù trừ/trừ', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'deductReason', 'label' => 'Lý do trừ cọc', 'control' => 'textarea', 'attrs' => ['rows' => 3, 'maxlength' => 500]]) ?>
+    <?= $row(['name' => 'refundedAmount', 'label' => 'Đã hoàn', 'type' => 'number', 'attrs' => ['min' => 0]]) ?>
+    <?= $row(['name' => 'refundedDate', 'label' => 'Ngày hoàn cọc', 'type' => 'date']) ?>
+    <?= $row(['name' => 'note', 'label' => 'Ghi chú', 'control' => 'textarea', 'attrs' => ['rows' => 4, 'maxlength' => 500]]) ?>
+    <?= $this->partial('partial/form/actions', ['submitLabel' => $deposit ? 'Lưu thay đổi' : 'Thêm phiếu cọc', 'cancelUrl' => $this->url('deposits')]) ?>
+<?= $this->partial('partial/form/close') ?>

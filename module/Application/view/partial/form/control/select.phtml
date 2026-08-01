@@ -1,0 +1,32 @@
+<?php
+/**
+ * Ô chọn. Gọi qua partial/form/row với `choices` là mảng giá trị => nhãn.
+ *
+ * Giá trị của option lấy từ enum trong <Entity>Const — không hardcode chuỗi trạng thái ở view.
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var string $name
+ * @var mixed  $value
+ * @var bool   $required
+ * @var bool   $hasError
+ * @var string $errorId
+ * @var array<string, string> $attrs
+ * @var array<string|int, string> $choices
+ * @var string $emptyChoice
+ */
+?>
+<select id="<?= $this->escapeHtmlAttr($name) ?>"
+        name="<?= $this->escapeHtmlAttr($name) ?>"
+        <?= $required ? 'required' : '' ?>
+        <?= $hasError ? 'aria-invalid="true" aria-describedby="' . $this->escapeHtmlAttr($errorId) . '"' : '' ?>
+        <?= $this->partial('partial/form/control/attrs', ['attrs' => $attrs]) ?>>
+    <?php if ($emptyChoice !== ''): ?>
+        <option value=""><?= $this->escapeHtml($emptyChoice) ?></option>
+    <?php endif; ?>
+    <?php foreach ($choices as $choiceValue => $choiceLabel): ?>
+        <option value="<?= $this->escapeHtmlAttr((string)$choiceValue) ?>"
+            <?= (string)$value === (string)$choiceValue ? 'selected' : '' ?>>
+            <?= $this->escapeHtml($choiceLabel) ?>
+        </option>
+    <?php endforeach; ?>
+</select>
