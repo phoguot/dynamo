@@ -9,6 +9,8 @@
  * @var array<string, string> $nextStatuses
  * @var User\Form\User\UserStatusForm $statusForm
  * @var User\Form\User\UserPasswordForm $passwordForm
+ * @var User\Form\User\UserDeleteForm $deleteForm
+ * @var bool $canDelete
  * @var array<string, string> $errors
  *
  * CHƯA CHỐT HỆ THIẾT KẾ (.claude/rules/ui.md).
@@ -65,6 +67,16 @@ $this->headTitle((string)$user->getFullName());
     <h2>Đặt lại mật khẩu</h2>
     <?= $this->partial('partial/user/password-form', [
         'form'   => $passwordForm,
+        'user'   => $user,
+        'errors' => $errors,
+    ]) ?>
+<?php endif; ?>
+
+<?php /* Xóa tài khoản: chỉ Quản trị hệ thống, và không cho tự xóa tài khoản đang đăng nhập. */ ?>
+<?php if ($canDelete && !$isSelf): ?>
+    <h2>Xóa tài khoản</h2>
+    <?= $this->partial('partial/user/delete-form', [
+        'form'   => $deleteForm,
         'user'   => $user,
         'errors' => $errors,
     ]) ?>
