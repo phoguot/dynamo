@@ -219,6 +219,24 @@ class UserMapper extends AppMapper
         return $map;
     }
 
+    /**
+     * Xóa cứng một tài khoản khỏi bảng.
+     *
+     * Chỉ được gọi từ UserService::deleteUser() — nơi đã kiểm các bất biến an toàn, xóa dữ
+     * liệu con (usr_user_permissions) và ghi audit log trong cùng transaction. Không gọi
+     * thẳng hàm này từ nơi khác.
+     */
+    public function deleteUser(int $id): void
+    {
+        if ($id <= 0) {
+            return;
+        }
+
+        $dbSql = $this->getDbSql();
+        $delete = $dbSql->delete(UserMapper::TABLE_NAME)->where(['id = ?' => $id]);
+        $dbSql->prepareStatementForSqlObject($delete)->execute();
+    }
+
     /** @param array<string, mixed> $where */
     private function fetchOne(array $where, ?int $exceptId = null): ?UserModel
     {

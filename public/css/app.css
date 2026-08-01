@@ -1493,6 +1493,151 @@ code,
   }
 }
 
+/* ── Phân quyền (M01) — ma trận gom theo module ─────────────────────────── */
+.permHead .badge { vertical-align: baseline; }
+
+.permLegend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+.permLegend__item {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-xs) var(--space-sm);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-paper);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+}
+.permLegend__key {
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+.permLegend__item span:last-child { font-size: 13px; line-height: 1.45; }
+.permLegend__note {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--color-ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Không để bộ chọn 2-cột form chung bẻ ma trận thành hai cột. */
+.permMatrix {
+  display: grid;
+  grid-template-columns: 1fr !important;
+  gap: var(--space-md);
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.permToolbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+.permToolbar__search { flex: 1 1 240px; min-width: 0; margin: 0; }
+.permToolbar__search input { min-height: 40px; }
+.permToolbar__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+.permToolbar__toggle input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+}
+.permToolbar [data-perm-count] { margin-left: auto; }
+
+.permJump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.permJump a {
+  min-height: 32px;
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+  color: var(--color-ink-2);
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+.permJump a:hover { text-decoration: none; background: var(--color-surface); color: var(--color-ink); }
+
+.permModule { scroll-margin-top: 68px; }
+.permTable { font-size: 13px; }
+.permTable th[scope="row"] {
+  background: transparent;
+  font-weight: 700;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.permTable th[scope="row"] label { cursor: pointer; }
+
+/* Nhóm dòng của một màn hình: một hàng nhãn, hiện một lần cho cả nhóm. */
+.permScreen__head th {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 9px 10px;
+}
+.permScreen + .permScreen .permScreen__head th {
+  border-top: 2px solid var(--color-rule);
+}
+
+.permRow.is-override th[scope="row"] {
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+.permTable td[data-label="Ngoại lệ"] { width: 220px; }
+.permTable td[data-label="Ngoại lệ"] select { min-height: 36px; }
+
+.permFlag {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+.permFlag.on { color: var(--color-ink); }
+.permFlag.off { color: var(--color-ink-2); }
+
+.permReset__hint { margin: 0 0 var(--space-sm); color: var(--color-ink-2); }
+
+@media (max-width: 1100px) {
+  .permLegend { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .permToolbar { position: static; }
+  .permToolbar [data-perm-count] { margin-left: 0; }
+  .permTable td[data-label="Ngoại lệ"] { width: auto; }
+  .permTable td[data-label="Ngoại lệ"] select { min-height: 44px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0ms !important;

@@ -1,0 +1,42 @@
+<?php
+/**
+ * MARKUP form xóa vĩnh viễn một tài khoản, đặt trên trang chi tiết.
+ *
+ * Form này có CSRF token RIÊNG, khác token của form khóa/mở khóa và form mật khẩu.
+ * Chỉ Quản trị hệ thống thấy form này (controller kiểm quyền `delete` trước khi truyền xuống).
+ *
+ * @var Laminas\View\Renderer\PhpRenderer $this
+ * @var User\Form\User\UserDeleteForm $form
+ * @var User\Model\User\UserModel $user
+ * @var array<string, string> $errors
+ */
+
+$row = fn (array $config): string => $this->partial(
+    'partial/form/row',
+    $config + ['values' => [], 'errors' => $errors]
+);
+?>
+<p>Xóa tài khoản là thao tác <strong>không thể hoàn tác</strong>: tài khoản
+   <strong><?= $this->escapeHtml((string)$user->getUsername()) ?></strong> và toàn bộ phân quyền
+   riêng của người này sẽ bị xóa vĩnh viễn. Vết tích còn lại trong nhật ký kiểm toán.</p>
+
+<?= $this->partial('partial/form/open', [
+    'form'   => $form,
+    'action' => $this->url('users', ['action' => 'delete', 'id' => $user->getId()]),
+    'class'  => 'form-delete-user',
+]) ?>
+
+    <?= $row([
+        'name'     => 'confirmUsername',
+        'label'    => 'Gõ tên đăng nhập để xác nhận',
+        'required' => true,
+        'hint'     => 'Gõ đúng "' . $this->escapeHtml((string)$user->getUsername()) . '" để bật nút xóa.',
+        'attrs'    => ['maxlength' => 30, 'autocomplete' => 'off'],
+    ]) ?>
+
+    <?= $this->partial('partial/form/actions', [
+        'submitLabel' => 'Xóa tài khoản',
+        'confirm'     => 'Tài khoản và phân quyền riêng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác. Tiếp tục?',
+    ]) ?>
+
+<?= $this->partial('partial/form/close') ?>

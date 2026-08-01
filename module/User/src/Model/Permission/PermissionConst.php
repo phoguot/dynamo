@@ -104,6 +104,7 @@ class PermissionConst extends AppConstModel
                 'edit'         => 'Sửa người dùng',
                 'changestatus' => 'Khóa / mở khóa tài khoản',
                 'resetpassword' => 'Đặt lại mật khẩu',
+                'delete'       => 'Xóa tài khoản',
             ],
         ],
         'user:permission' => [

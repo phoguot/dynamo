@@ -11,16 +11,24 @@
  * @var array<string, array<string, bool>> $effective
  * @var bool $isAdminAccount
  * @var array<string, string> $errors
- *
- * CHƯA CHỐT HỆ THIẾT KẾ (.claude/rules/ui.md).
  */
 
 $this->headTitle('Phân quyền — ' . (string)$user->getFullName());
+$detailUrl = $this->url('users', ['action' => 'detail', 'id' => (int)$user->getId()]);
 ?>
-<h1>Phân quyền</h1>
-<p><?= $this->escapeHtml((string)$user->getFullName()) ?>
-   (<?= $this->escapeHtml((string)$user->getUsername()) ?>) ·
-   vai trò <?= $this->escapeHtml($user->getRoleLabel()) ?></p>
+<div class="pageHead permHead">
+    <div>
+        <h1>Phân quyền</h1>
+        <p>
+            <?= $this->escapeHtml((string)$user->getFullName()) ?>
+            (<?= $this->escapeHtml((string)$user->getUsername()) ?>) ·
+            vai trò <span class="badge"><?= $this->escapeHtml($user->getRoleLabel()) ?></span>
+        </p>
+    </div>
+    <nav class="actions">
+        <a href="<?= $this->escapeHtmlAttr($detailUrl) ?>">Về chi tiết tài khoản</a>
+    </nav>
+</div>
 
 <?php foreach ($this->flashMessenger()->getSuccessMessages() as $message): ?>
     <p role="status"><?= $this->escapeHtml($message) ?></p>
@@ -34,22 +42,27 @@ $this->headTitle('Phân quyền — ' . (string)$user->getFullName());
         Tài khoản Quản trị hệ thống luôn có toàn quyền và không phân quyền riêng được.
         Muốn giới hạn thì đổi vai trò của tài khoản này trước.
     </p>
-    <p><a href="<?= $this->url('users', ['action' => 'detail', 'id' => (int)$user->getId()]) ?>">Về chi tiết tài khoản</a></p>
     <?php return; ?>
 <?php endif; ?>
 
-<h2>Cách đọc bảng</h2>
-<ul>
-    <li><strong>Mặc định vai trò</strong> — quyền mà vai trò
-        "<?= $this->escapeHtml($user->getRoleLabel()) ?>" đã có sẵn.</li>
-    <li><strong>Ngoại lệ</strong> — điều chỉnh riêng cho người này. Để trống nghĩa là theo vai trò.</li>
-    <li><strong>Kết quả</strong> — quyền thực tế sau khi cộng ngoại lệ vào mặc định.</li>
-</ul>
-<p>
-    Cấp thêm quyền cho một màn hình mà vai trò này không được phép vào sẽ không có tác dụng:
-    mỗi action phải được khai trong ACL; action chưa khai sẽ bị từ chối và không nằm ngoài kiểm soát.
-    không vượt qua được.
-</p>
+<section class="panel permLegend" aria-label="Cách đọc bảng phân quyền">
+    <div class="permLegend__item">
+        <span class="permLegend__key">Mặc định vai trò</span>
+        <span>Quyền vai trò “<?= $this->escapeHtml($user->getRoleLabel()) ?>” đã có sẵn.</span>
+    </div>
+    <div class="permLegend__item">
+        <span class="permLegend__key">Ngoại lệ</span>
+        <span>Điều chỉnh riêng cho người này. Để trống = theo vai trò.</span>
+    </div>
+    <div class="permLegend__item">
+        <span class="permLegend__key">Kết quả</span>
+        <span>Quyền thực tế sau khi cộng ngoại lệ vào mặc định.</span>
+    </div>
+    <p class="permLegend__note">
+        Cấp thêm quyền cho màn hình mà vai trò này không được vào sẽ không có tác dụng: mỗi
+        action phải được khai trong ACL, action chưa khai luôn bị từ chối.
+    </p>
+</section>
 
 <?= $this->partial('partial/permission/matrix-form', [
     'form'         => $permissionForm,
@@ -60,11 +73,13 @@ $this->headTitle('Phân quyền — ' . (string)$user->getFullName());
     'errors'       => $errors,
 ]) ?>
 
-<h2>Gỡ toàn bộ ngoại lệ</h2>
-<p>Đưa tài khoản về đúng quyền mặc định của vai trò.</p>
-<?= $this->partial('partial/permission/reset-form', [
-    'form' => $resetForm,
-    'user' => $user,
-]) ?>
-
-<p><a href="<?= $this->url('users', ['action' => 'detail', 'id' => (int)$user->getId()]) ?>">Về chi tiết tài khoản</a></p>
+<section class="panel permReset">
+    <div class="panelHead">
+        <strong>Gỡ toàn bộ ngoại lệ</strong>
+    </div>
+    <p class="permReset__hint">Đưa tài khoản về đúng quyền mặc định của vai trò.</p>
+    <?= $this->partial('partial/permission/reset-form', [
+        'form' => $resetForm,
+        'user' => $user,
+    ]) ?>
+</section>

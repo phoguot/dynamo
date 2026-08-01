@@ -1,10 +1,10 @@
 <?php
 /**
- * MARKUP ma trận phân quyền: mỗi dòng là một thao tác của một màn hình.
+ * MARKUP ma trận phân quyền: gom theo module, mỗi module MỘT bảng (tiêu đề cột hiện một lần),
+ * mỗi màn hình là một nhóm dòng có nhãn, mỗi dòng là một thao tác.
  *
- * Không dùng `partial/form/row` ở đây: mỗi ô chọn nằm trong một ô của bảng chứ không phải
- * một dòng nhãn–ô nhập–lỗi. Nhãn đi kèm là cột "Thao tác" của chính bảng, và ô chọn được
- * gắn `aria-label` để người dùng trình đọc màn hình vẫn biết mình đang sửa quyền nào.
+ * Không dùng `partial/form/row`: mỗi ô chọn nằm trong ô bảng chứ không phải dòng nhãn–ô–lỗi.
+ * Ô chọn được gắn `aria-label` để trình đọc màn hình biết đang sửa quyền nào.
  *
  * Tên field gửi lên: `perm[<resource>|<privilege>]` — khớp User\Form\User\UserPermissionForm.
  *
@@ -17,25 +17,49 @@
  * @var array<string, string> $errors
  */
 
-$effectChoices = $form->effectChoices();
+$effectChoices  = $form->effectChoices();
+$catalog        = $form->permissionCatalog();
+$overrideCount  = count(array_filter($overrides, static fn ($v) => $v !== ''));
 ?>
 <?= $this->partial('partial/form/errors', ['errors' => $errors, 'fields' => []]) ?>
 
 <?= $this->partial('partial/form/open', [
     'form'   => $form,
     'action' => $this->url('permissions', ['action' => 'save', 'id' => $user->getId()]),
-    'class'  => 'form-permission-matrix',
+    'class'  => 'form-permission-matrix permMatrix',
 ]) ?>
 
     <input type="hidden" name="userId" value="<?= (int)$user->getId() ?>">
 
-    <?php foreach ($form->permissionCatalog() as $module): ?>
-        <section>
-            <h3><?= $this->escapeHtml($module['label']) ?></h3>
+    <div class="permToolbar" role="search">
+        <label class="permToolbar__search">
+            <span class="srOnly">Tìm màn hình</span>
+            <input type="text" data-perm-filter placeholder="Lọc theo tên màn hình…" autocomplete="off">
+        </label>
+        <label class="permToolbar__toggle">
+            <input type="checkbox" data-perm-only-changed>
+            <span>Chỉ hiện dòng có ngoại lệ</span>
+        </label>
+        <span class="badge <?= $overrideCount > 0 ? 'run' : '' ?>" data-perm-count>
+            <?= (int)$overrideCount ?> ngoại lệ đang đặt
+        </span>
+    </div>
 
-            <?php foreach ($module['resources'] as $resource => $meta): ?>
-                <table>
-                    <caption><?= $this->escapeHtml($meta['label']) ?></caption>
+    <nav class="permJump" aria-label="Chuyển nhanh tới module">
+        <?php foreach ($catalog as $i => $module): ?>
+            <a href="#permMod<?= (int)$i ?>"><?= $this->escapeHtml($module['label']) ?></a>
+        <?php endforeach; ?>
+    </nav>
+
+    <?php foreach ($catalog as $i => $module): ?>
+        <section class="panel permModule" id="permMod<?= (int)$i ?>">
+            <div class="panelHead">
+                <strong><?= $this->escapeHtml($module['label']) ?></strong>
+                <span class="badge"><?= count($module['resources']) ?> màn hình</span>
+            </div>
+
+            <div class="tableScroll">
+                <table class="permTable">
                     <thead>
                     <tr>
                         <th scope="col">Thao tác</th>
@@ -44,47 +68,63 @@ $effectChoices = $form->effectChoices();
                         <th scope="col">Kết quả</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <?php foreach ($meta['privileges'] as $privilege => $privilegeLabel): ?>
-                        <?php
-                        $key       = $resource . '|' . $privilege;
-                        $isDefault = in_array($privilege, $roleDefaults[$resource] ?? [], true);
-                        $current   = $overrides[$key] ?? '';
-                        $isAllowed = $effective[$resource][$privilege] ?? false;
-                        $fieldName = 'perm[' . $key . ']';
-                        $fieldId   = 'perm-' . preg_replace('/[^a-z0-9]+/i', '-', $key);
-                        ?>
-                        <tr>
-                            <th scope="row">
-                                <label for="<?= $this->escapeHtmlAttr($fieldId) ?>">
-                                    <?= $this->escapeHtml($privilegeLabel) ?>
-                                </label>
-                            </th>
-                            <td><?= $isDefault ? 'Có' : 'Không' ?></td>
-                            <td>
-                                <select id="<?= $this->escapeHtmlAttr($fieldId) ?>"
-                                        name="<?= $this->escapeHtmlAttr($fieldName) ?>"
-                                        aria-label="<?= $this->escapeHtmlAttr(sprintf(
-                                            'Ngoại lệ quyền "%s" của màn hình %s',
-                                            $privilegeLabel,
-                                            $meta['label']
-                                        )) ?>">
-                                    <option value="">Theo vai trò</option>
-                                    <?php foreach ($effectChoices as $effectValue => $effectLabel): ?>
-                                        <option value="<?= $this->escapeHtmlAttr($effectValue) ?>"
-                                            <?= $current === $effectValue ? 'selected' : '' ?>>
-                                            <?= $this->escapeHtml($effectLabel) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </td>
-                            <?php /* Không dùng màu làm tín hiệu duy nhất — luôn kèm chữ (.claude/rules/ui.md). */ ?>
-                            <td><?= $isAllowed ? 'Được phép' : 'Không được phép' ?></td>
-                        </tr>
+
+                    <?php foreach ($module['resources'] as $resource => $meta): ?>
+                        <tbody class="permScreen" data-perm-screen="<?= $this->escapeHtmlAttr(mb_strtolower($meta['label'])) ?>">
+                            <tr class="permScreen__head">
+                                <th scope="colgroup" colspan="4"><?= $this->escapeHtml($meta['label']) ?></th>
+                            </tr>
+                            <?php foreach ($meta['privileges'] as $privilege => $privilegeLabel): ?>
+                                <?php
+                                $key       = $resource . '|' . $privilege;
+                                $isDefault = in_array($privilege, $roleDefaults[$resource] ?? [], true);
+                                $current   = $overrides[$key] ?? '';
+                                $isAllowed = $effective[$resource][$privilege] ?? false;
+                                $fieldName = 'perm[' . $key . ']';
+                                $fieldId   = 'perm-' . preg_replace('/[^a-z0-9]+/i', '-', $key);
+                                ?>
+                                <tr class="permRow<?= $current !== '' ? ' is-override' : '' ?>"
+                                    data-perm-changed="<?= $current !== '' ? '1' : '0' ?>">
+                                    <th scope="row">
+                                        <label for="<?= $this->escapeHtmlAttr($fieldId) ?>">
+                                            <?= $this->escapeHtml($privilegeLabel) ?>
+                                        </label>
+                                    </th>
+                                    <td data-label="Mặc định">
+                                        <span class="permFlag <?= $isDefault ? 'on' : 'off' ?>">
+                                            <?= $isDefault ? 'Có' : 'Không' ?>
+                                        </span>
+                                    </td>
+                                    <td data-label="Ngoại lệ">
+                                        <select id="<?= $this->escapeHtmlAttr($fieldId) ?>"
+                                                data-perm-select
+                                                name="<?= $this->escapeHtmlAttr($fieldName) ?>"
+                                                aria-label="<?= $this->escapeHtmlAttr(sprintf(
+                                                    'Ngoại lệ quyền "%s" của màn hình %s',
+                                                    $privilegeLabel,
+                                                    $meta['label']
+                                                )) ?>">
+                                            <option value="">Theo vai trò</option>
+                                            <?php foreach ($effectChoices as $effectValue => $effectLabel): ?>
+                                                <option value="<?= $this->escapeHtmlAttr($effectValue) ?>"
+                                                    <?= $current === $effectValue ? 'selected' : '' ?>>
+                                                    <?= $this->escapeHtml($effectLabel) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <?php /* Không dùng màu làm tín hiệu duy nhất — luôn kèm chữ (.claude/rules/ui.md). */ ?>
+                                    <td data-label="Kết quả">
+                                        <span class="badge <?= $isAllowed ? 'run' : '' ?>">
+                                            <?= $isAllowed ? 'Được phép' : 'Không được phép' ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
                     <?php endforeach; ?>
-                    </tbody>
                 </table>
-            <?php endforeach; ?>
+            </div>
         </section>
     <?php endforeach; ?>
 
@@ -95,3 +135,57 @@ $effectChoices = $form->effectChoices();
 
 <?= $this->partial('partial/form/close') ?>
 
+<script>
+(function () {
+    var form = document.querySelector('.permMatrix');
+    if (!form) { return; }
+
+    var filterInput = form.querySelector('[data-perm-filter]');
+    var onlyChanged = form.querySelector('[data-perm-only-changed]');
+    var modules     = form.querySelectorAll('.permModule');
+
+    function apply() {
+        var term = (filterInput.value || '').trim().toLowerCase();
+        var changedOnly = onlyChanged.checked;
+
+        modules.forEach(function (mod) {
+            var anyVisible = false;
+            mod.querySelectorAll('.permScreen').forEach(function (screen) {
+                var name = screen.getAttribute('data-perm-screen') || '';
+                var matchText = !term || name.indexOf(term) !== -1;
+                var rows = screen.querySelectorAll('.permRow');
+                var screenHasChanged = false;
+                var rowVisible = false;
+
+                rows.forEach(function (row) {
+                    var isChanged = row.getAttribute('data-perm-changed') === '1';
+                    if (isChanged) { screenHasChanged = true; }
+                    var show = matchText && (!changedOnly || isChanged);
+                    row.hidden = !show;
+                    if (show) { rowVisible = true; }
+                });
+
+                var showScreen = matchText && (!changedOnly || screenHasChanged) && rowVisible;
+                screen.hidden = !showScreen;
+                if (showScreen) { anyVisible = true; }
+            });
+            mod.hidden = !anyVisible;
+        });
+    }
+
+    // Cập nhật cờ "có ngoại lệ" ngay khi người dùng đổi ô chọn, để bộ lọc phản ánh đúng.
+    form.querySelectorAll('[data-perm-select]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            var row = sel.closest('.permRow');
+            if (!row) { return; }
+            var changed = sel.value !== '';
+            row.setAttribute('data-perm-changed', changed ? '1' : '0');
+            row.classList.toggle('is-override', changed);
+            apply();
+        });
+    });
+
+    filterInput.addEventListener('input', apply);
+    onlyChanged.addEventListener('change', apply);
+})();
+</script>

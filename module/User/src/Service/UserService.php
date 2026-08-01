@@ -9,11 +9,14 @@ use Application\Exception\ValidationException;
 use Application\Factory\AppServiceFactory;
 use Application\Paginator\Paginator;
 use Application\Paginator\PaginatorUtil;
+use Throwable;
+use User\Form\User\UserDeleteForm;
 use User\Form\User\UserPasswordForm;
 use User\Form\User\UserSaveForm;
 use User\Form\User\UserSearchForm;
 use User\Form\User\UserStatusForm;
 use User\Model\AuditLog\AuditLogModel;
+use User\Model\Permission\PermissionMapper;
 use User\Model\User\UserConst;
 use User\Model\User\UserMapper;
 use User\Model\User\UserModel;
@@ -74,6 +77,11 @@ class UserService extends AppServiceFactory
     public function newPasswordForm(): UserPasswordForm
     {
         return new UserPasswordForm($this->getContainer());
+    }
+
+    public function newDeleteForm(): UserDeleteForm
+    {
+        return new UserDeleteForm($this->getContainer());
     }
 
     /**
@@ -324,6 +332,88 @@ class UserService extends AppServiceFactory
         return $item;
     }
 
+    /**
+     * Xóa vĩnh viễn một tài khoản (chỉ Quản trị hệ thống).
+     *
+     * Xóa cứng có chủ đích theo .claude/rules/database.md: xóa dữ liệu con cùng module
+     * (usr_user_permissions) và ghi audit log với snapshot `before` TRONG cùng transaction,
+     * rồi mới xóa parent. Không có soft delete — vết tích còn nguyên trong usr_audit_logs.
+     *
+     * Lỗi ngoài dự kiến (mất kết nối DB, khóa hàng...) được ghi vào bảng pfm_error_logs qua
+     * Platform\Service\ErrorLogService, rồi báo lại cho người dùng bằng một câu lỗi đẹp.
+     *
+     * @param array<string, mixed> $payload
+     * @throws ValidationException
+     */
+    public function deleteUser(array $payload = []): UserModel
+    {
+        $form = new UserDeleteForm($this->getContainer());
+        $form->setData($payload);
+        if (!$form->isValid()) {
+            throw new ValidationException($form->getMessagesArr());
+        }
+
+        $formData = $form->getData();
+        $id = (int)($formData['id'] ?? 0);
+        $item = $this->getUser($id);
+
+        // Tự xóa tài khoản đang đăng nhập là cách nhanh nhất tự khóa mình khỏi hệ thống.
+        if ($id === $this->currentUserId()) {
+            throw new ValidationException([
+                'confirmUsername' => 'Không thể tự xóa tài khoản đang đăng nhập. Nhờ một quản trị viên khác thực hiện.',
+            ]);
+        }
+
+        // Xác nhận bằng cách gõ đúng tên đăng nhập — chặn xóa nhầm.
+        $confirm = strtolower(trim((string)($formData['confirmUsername'] ?? '')));
+        if ($confirm !== strtolower((string)$item->getUsername())) {
+            throw new ValidationException([
+                'confirmUsername' => 'Tên đăng nhập xác nhận không khớp. Gõ đúng tên đăng nhập của tài khoản cần xóa.',
+            ]);
+        }
+
+        // Xóa người quản trị đang hoạt động cuối cùng ⇒ hệ thống mất quản trị, không ai vào
+        // được màn hình phân quyền để sửa lại.
+        if ($item->getRole() === UserConst::ROLE_ADMIN
+            && $this->mapper()->countActiveAdmins($id) === 0
+        ) {
+            throw new ValidationException([
+                'confirmUsername' => 'Đây là tài khoản Quản trị hệ thống đang hoạt động duy nhất, không được xóa.',
+            ]);
+        }
+
+        $before = $item->getRespUser();
+        $mapper = $this->mapper();
+        $permissionMapper = $this->getContainerEntry(PermissionMapper::class);
+
+        try {
+            $mapper->transactional(function () use ($id, $mapper, $permissionMapper, $before): void {
+                // Xóa dữ liệu con cùng bounded context TRƯỚC parent — schema không dùng FK CASCADE.
+                if ($permissionMapper instanceof PermissionMapper) {
+                    $permissionMapper->deleteByUser($id);
+                }
+                $mapper->deleteUser($id);
+
+                // Ghi audit trong cùng transaction: xóa và vết tích là một hành động.
+                $this->auditLog()->write(
+                    AuditLogModel::ACTION_DELETE,
+                    UserMapper::TABLE_NAME,
+                    $id,
+                    $before,
+                    null
+                );
+            });
+        } catch (Throwable $e) {
+            $this->logError($e, ['operation' => 'user.delete', 'targetUserId' => $id]);
+            throw new ValidationException([
+                'confirmUsername' => 'Không xóa được tài khoản do lỗi hệ thống. '
+                    . 'Sự cố đã được ghi lại, vui lòng thử lại sau.',
+            ]);
+        }
+
+        return $item;
+    }
+
     // ------------------------------------------------------------------
     //  API công khai cho module khác
     // ------------------------------------------------------------------
@@ -359,6 +449,34 @@ class UserService extends AppServiceFactory
             'role'     => $item->getRole(),
             'note'     => $item->getNote(),
         ];
+    }
+
+    /**
+     * Ghi một lỗi ngoài dự kiến vào bảng pfm_error_logs (module Platform).
+     *
+     * Gọi qua tên service dạng chuỗi thay vì import class của M10 để không phá ranh giới
+     * module — ErrorLogService là dịch vụ shared kernel, đúng cách dùng ở .claude/rules/module-boundaries.md.
+     * Ghi log lỗi mà lại lỗi thì nuốt: không để việc ghi log che mất lỗi nghiệp vụ gốc.
+     *
+     * @param array<string, mixed> $context
+     */
+    private function logError(Throwable $e, array $context = []): void
+    {
+        $service = $this->getContainerEntry('Platform\\Service\\ErrorLogService');
+        if ($service === null || !method_exists($service, 'logThrowable')) {
+            return;
+        }
+
+        try {
+            $service->logThrowable($e, $context + [
+                'source'    => 'web',
+                'level'     => 'error',
+                'errorCode' => 'user.delete.failed',
+                'userId'    => $this->currentUserId(),
+            ]);
+        } catch (Throwable) {
+            // Nuốt có chủ đích — xem chú thích trên.
+        }
     }
 
     private function nullIfBlank(mixed $value): ?string

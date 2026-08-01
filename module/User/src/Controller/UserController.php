@@ -58,6 +58,8 @@ class UserController extends BaseController
             'nextStatuses' => $service->nextStatuses($user),
             'statusForm'   => $service->newStatusForm(),
             'passwordForm' => $service->newPasswordForm(),
+            'deleteForm'   => $service->newDeleteForm(),
+            'canDelete'    => $this->isAllowedAction('delete'),
             'errors'       => [],
         ]);
 
@@ -147,6 +149,36 @@ class UserController extends BaseController
         }
 
         return $this->redirect()->toRoute('users', ['action' => 'detail', 'id' => $id]);
+    }
+
+    /** Xóa vĩnh viễn một tài khoản (POST từ trang chi tiết). */
+    public function deleteAction(): mixed
+    {
+        $id = (int)$this->params()->fromRoute('id', 0);
+
+        // Xóa là thao tác ĐỔI dữ liệu: chỉ nhận POST, GET quay về trang chi tiết.
+        if (!$this->getRequest()->isPost()) {
+            return $this->redirect()->toRoute('users', ['action' => 'detail', 'id' => $id]);
+        }
+
+        $payload = $this->getAllPostParams();
+        $payload['id'] = $id;
+        $service = $this->getContainerEntry(UserService::class);
+
+        try {
+            $user = $service->deleteUser($payload);
+            $this->flashMessenger()->addSuccessMessage(sprintf(
+                'Đã xóa tài khoản %s — %s.',
+                (string)$user->getUsername(),
+                (string)$user->getFullName()
+            ));
+
+            return $this->redirect()->toRoute('users');
+        } catch (ValidationException $e) {
+            $this->flashMessenger()->addErrorMessage(implode(' ', $e->getErrors()));
+
+            return $this->redirect()->toRoute('users', ['action' => 'detail', 'id' => $id]);
+        }
     }
 
     // ------------------------------------------------------------------
